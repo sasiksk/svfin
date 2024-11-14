@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class EmptyCard extends StatelessWidget {
   final double screenHeight;
   final double screenWidth;
-  final String title;
+  final String? title;
   final Widget content;
 
   EmptyCard({
     required this.screenHeight,
     required this.screenWidth,
-    required this.title,
+    this.title,
     required this.content,
   });
 
@@ -44,9 +44,9 @@ class EmptyCard extends StatelessWidget {
                   CrossAxisAlignment.start, // Align content to start
               children: <Widget>[
                 Text(
-                  title,
+                  title ?? 'Default Title',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.white, // White text color
                   ),

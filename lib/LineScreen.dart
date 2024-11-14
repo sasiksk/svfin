@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/Utilities/BottomNavigationBar.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
+import 'package:svf/home_screen.dart';
+import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 
 class LineScreen extends StatefulWidget {
   final Map<String, dynamic>? entry; // Add this line
@@ -33,7 +34,6 @@ class _LineScreenState extends State<LineScreen> {
 
   void _resetForm() {
     _formKey.currentState?.reset();
-
     _lineNameController.clear();
   }
 
@@ -112,23 +112,6 @@ class _LineScreenState extends State<LineScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-          child: BottomAppBar(
-        color: const Color.fromARGB(255, 40, 65, 2),
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        height: MediaQuery.of(context).size.width * 0.23,
-        child: Container(
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              CustomBottomNavigationBar(),
-            ],
-          ),
-        ),
-      )),
     );
   }
 }

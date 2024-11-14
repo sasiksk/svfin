@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
+import 'package:svf/LineScreen.dart';
+import 'package:svf/ReportScreen.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/BottomNavigationBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/LineCard.dart';
 import 'package:svf/Utilities/drawer.dart';
+import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 import 'package:svf/linedetailScreen.dart';
 import 'finance_provider.dart';
 
@@ -66,7 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: Column(
         children: [
           EmptyCard(
-            screenHeight: MediaQuery.of(context).size.height * 1.5,
+            screenHeight: MediaQuery.of(context).size.height * 1.25,
             screenWidth: MediaQuery.of(context).size.width,
             title: 'Finance Details',
             content: Column(
@@ -94,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(fontSize: 16),
                     ),
                     Text(
-                      'in Line: ₹${(totalAmtGiven - totalAmtRecieved).toStringAsFixed(2)}',
+                      'in Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
                       style: TextStyle(fontSize: 16),
                     ),
                   ],
@@ -102,26 +105,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
+          const SizedBox(
+            height: 3,
+          ),
+          Text(
+            'Line List ',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors
+                  .black, // Use Colors.black or Colors.grey[800] for contrast
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: lineNames.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    handleLineSelected(lineNames[index]);
-                  },
-                  child: LineCard(
-                    lineName: lineNames[index],
-                    screenWidth: MediaQuery.of(context).size.width,
-                    onLineSelected: () => handleLineSelected(lineNames[index]),
-                  ),
+                return LineCard(
+                  lineName: lineNames[index],
+                  screenWidth: MediaQuery.of(context).size.width,
+                  onLineSelected: () => handleLineSelected(lineNames[index]),
                 );
               },
             ),
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      floatingActionButton: FloatingActionButtonWithText(
+        label: 'Add Line',
+        navigateTo: LineScreen(),
+        icon: Icons.add,
+      ),
     );
   }
 }

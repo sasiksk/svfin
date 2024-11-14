@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 class LineCard extends StatelessWidget {
   final String lineName;
   final double screenWidth;
-  final VoidCallback onLineSelected;
+  final VoidCallback? onLineSelected;
 
   LineCard({
     required this.lineName,
     required this.screenWidth,
-    required this.onLineSelected,
+    this.onLineSelected,
   });
 
   @override
@@ -16,7 +16,7 @@ class LineCard extends StatelessWidget {
     return GestureDetector(
       onTap: onLineSelected, // Correctly invoke the callback
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 10.0),
+        margin: EdgeInsets.only(top: 10, left: 10, right: 10),
         width: screenWidth - 40, // Full width minus padding (20 on each side)
         child: Card(
           elevation: 10.0,
@@ -40,7 +40,7 @@ class LineCard extends StatelessWidget {
                   20.0), // Increased padding for consistency
               child: Text(
                 lineName,
-                textAlign: TextAlign.start,
+                textAlign: TextAlign.justify,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
+import 'package:svf/PartyDetailScreen.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/finance_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:svf/linedetailScreen.dart';
 
 class CollectionScreen extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
@@ -138,6 +140,12 @@ class CollectionScreen extends ConsumerWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Form Submitted')),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PartyDetailScreen(),
+                            ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(

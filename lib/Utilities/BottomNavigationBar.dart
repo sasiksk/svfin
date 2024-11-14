@@ -3,7 +3,15 @@ import 'package:svf/PartyDetailScreen.dart';
 import 'package:svf/Utilities/PartyScreen.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
-  const CustomBottomNavigationBar({super.key});
+  final List<IconData> icons;
+  final List<Widget> screens;
+
+  const CustomBottomNavigationBar({
+    super.key,
+    required this.icons,
+    required this.screens,
+  }) : assert(icons.length == screens.length,
+            'Icons and screens lists must have the same length.');
 
   @override
   Widget build(BuildContext context) {
@@ -15,45 +23,17 @@ class CustomBottomNavigationBar extends StatelessWidget {
         height: 70,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.home, color: Colors.white),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-            IconButton(
-              icon: const Icon(Icons.account_balance, color: Colors.white),
-              onPressed: () {
-                /* Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CapitalScreen()),
-                );*/
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.line_axis, color: Colors.white),
+          children: List.generate(icons.length, (index) {
+            return IconButton(
+              icon: Icon(icons[index], color: Colors.white),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PartyScreen()),
+                  MaterialPageRoute(builder: (context) => screens[index]),
                 );
               },
-            ),
-            IconButton(
-              icon: const Icon(Icons.print, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-                );
-              },
-            ),
-          ],
+            );
+          }),
         ),
       ),
     );

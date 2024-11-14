@@ -215,6 +215,72 @@ class dbline {
 }
 
 class dbLending {
+  static Future<Map<String, double>> getLineSums(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final result = await db.rawQuery('''
+      SELECT 
+        SUM(AmtGiven) as totalAmtGiven, 
+        SUM(Profit) as totalProfit, 
+        SUM(AmtCollected) as totalAmtCollected, 
+        SUM(DueAmt) as totalDueAmt 
+      FROM Lending
+      WHERE LineName = ?
+    ''', [lineName]);
+
+    if (result.isNotEmpty) {
+      return {
+        'totalAmtGiven': result.first['totalAmtGiven'] as double? ?? 0.0,
+        'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
+        'totalAmtCollected':
+            result.first['totalAmtCollected'] as double? ?? 0.0,
+        'totalDueAmt': result.first['totalDueAmt'] as double? ?? 0.0,
+      };
+    } else {
+      return {
+        'totalAmtGiven': 0.0,
+        'totalProfit': 0.0,
+        'totalAmtCollected': 0.0,
+        'totalDueAmt': 0.0,
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getPartySums(int Lenid) async {
+    final db = await DatabaseHelper.getDatabase();
+    final result = await db.rawQuery('''
+      SELECT 
+        SUM(AmtGiven) as totalAmtGiven, 
+        SUM(Profit) as totalProfit, 
+        SUM(AmtCollected) as totalAmtCollected, 
+        SUM(DueAmt) as totalDueAmt,
+        MAX(DueDate) as dueDate,
+        MIN(Daysrem) as daysRemaining
+      FROM Lending
+      WHERE LenId = ?
+    ''', [Lenid]);
+
+    if (result.isNotEmpty) {
+      return {
+        'totalAmtGiven': result.first['totalAmtGiven'] as double? ?? 0.0,
+        'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
+        'totalAmtCollected':
+            result.first['totalAmtCollected'] as double? ?? 0.0,
+        'totalDueAmt': result.first['totalDueAmt'] as double? ?? 0.0,
+        'dueDate': result.first['dueDate'] as String? ?? '',
+        'daysRemaining': result.first['daysRemaining'] as int? ?? 0,
+      };
+    } else {
+      return {
+        'totalAmtGiven': 0.0,
+        'totalProfit': 0.0,
+        'totalAmtCollected': 0.0,
+        'totalDueAmt': 0.0,
+        'dueDate': '',
+        'daysRemaining': 0,
+      };
+    }
+  }
+
   static Future<void> updateDaysRem() async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> lendingEntries = await db.query(
@@ -381,6 +447,17 @@ class CollectionDB {
         'DrAmt': drAmt,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<List<Map<String, dynamic>>> getCollectionEntries(
+      int lenId) async {
+    final db = await DatabaseHelper.getDatabase();
+    return await db.query(
+      'Collection',
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+      orderBy: 'Date DESC',
     );
   }
 }
