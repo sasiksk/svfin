@@ -4,8 +4,25 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 import 'dart:math';
+import 'package:intl/intl.dart';
 
 class DatabaseHelper {
+  static Future<String?> getPartyNameByLenId(int lenId) async {
+    final db = await getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      columns: ['PartyName'],
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['PartyName'] as String?;
+    } else {
+      return null;
+    }
+  }
+
   static Future<int?> getLenId(String lineName, String partyName) async {
     final db = await getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
@@ -290,14 +307,15 @@ class dbLending {
     );
 
     final DateTime today = DateTime.now();
+    final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
 
     for (var entry in lendingEntries) {
       final String? lentDateStr = entry['Lentdate'] as String?;
       final String? dueDateStr = entry['duedate'] as String?;
 
       if (lentDateStr != null && dueDateStr != null) {
-        final DateTime lentDate = DateTime.parse(lentDateStr);
-        final DateTime dueDate = DateTime.parse(dueDateStr);
+        final DateTime lentDate = dateFormat.parse(lentDateStr);
+        final DateTime dueDate = dateFormat.parse(dueDateStr);
 
         final int daysRem = dueDate.difference(today).inDays + 1;
 
@@ -430,6 +448,22 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<List<Map<String, dynamic>>> getEntriesBetweenDates(
+      DateTime startDate, DateTime endDate) async {
+    final db = await DatabaseHelper.getDatabase();
+    final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+    final String startDateStr = dateFormat.format(startDate);
+    final String endDateStr = dateFormat.format(endDate);
+
+    final List<Map<String, dynamic>> result = await db.query(
+      'Collection',
+      where: 'Date BETWEEN ? AND ?',
+      whereArgs: [startDateStr, endDateStr],
+    );
+
+    return result;
+  }
+
   static Future<void> insertCollection({
     required int lenId,
     required String date,

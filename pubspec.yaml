@@ -42,6 +42,9 @@ dependencies:
   path: ^1.9.0
   font_awesome_flutter: ^10.8.0
   flutter_date_pickers: ^0.4.3
+  pdf: ^3.11.1
+  open_file: ^3.5.10
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

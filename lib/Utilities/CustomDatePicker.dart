@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
   final String hintText;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
 
   CustomDatePicker({
     required this.controller,
     required this.labelText,
     required this.hintText,
+    this.firstDate,
+    this.lastDate,
   });
 
   @override
@@ -26,20 +31,21 @@ class _CustomDatePickerState extends State<CustomDatePicker> {
         labelText: widget.labelText,
         hintText: widget.hintText,
         border: OutlineInputBorder(),
+        suffixIcon: Icon(Icons.calendar_today),
       ),
       readOnly: true,
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: _selectedDate ?? DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2101),
+          firstDate: widget.firstDate ?? DateTime(2000),
+          lastDate: widget.lastDate ?? DateTime(2100),
         );
         if (pickedDate != null) {
           setState(() {
             _selectedDate = pickedDate;
             widget.controller.text =
-                "${pickedDate.toLocal()}".split(' ')[0]; // Format as yyyy-MM-dd
+                DateFormat('dd-MM-yyyy').format(pickedDate);
           });
         }
       },

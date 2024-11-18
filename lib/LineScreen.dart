@@ -47,6 +47,10 @@ class _LineScreenState extends State<LineScreen> {
           SnackBar(content: Text('Line entry added successfully')),
         );
         _resetForm();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString())),
@@ -104,7 +108,10 @@ class _LineScreenState extends State<LineScreen> {
               SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomeScreen()),
+                  );
                 },
                 child: Text('Back'),
               ),

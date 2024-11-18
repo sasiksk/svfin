@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
 import 'package:svf/finance_provider.dart';
+import 'package:svf/linedetailScreen.dart';
 
 class PartyScreen extends ConsumerStatefulWidget {
   final String? partyName;
@@ -66,6 +67,10 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
           SnackBar(content: Text('Party added successfully')),
         );
         _resetForm();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LineDetailScreen()),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.toString())),
@@ -108,6 +113,9 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     }
                     return null;
                   },
+                ),
+                SizedBox(
+                  height: 10,
                 ),
                 CustomTextField(
                   controller: _partyNameController,

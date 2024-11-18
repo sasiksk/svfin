@@ -103,22 +103,21 @@ class PartyDetailScreen extends ConsumerWidget {
                 Expanded(
                   child: Center(
                     child: Text(
-                      '                           Cr',
+                      '                        You Gave',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.green,
+                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
 
-                // Right-aligned "Dr"
                 Text(
-                  'Dr',
+                  'You Got',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.red,
+                    color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -149,8 +148,7 @@ class PartyDetailScreen extends ConsumerWidget {
                       // Update balance based on credit or debit amount
 
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Card(
                           elevation: 3,
                           shape: RoundedRectangleBorder(
@@ -172,20 +170,20 @@ class PartyDetailScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    Text(
+                                      crAmt > 0 ? '₹$crAmt' : '',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
 
                                     Text(
                                       drAmt > 0 ? '₹ $drAmt' : '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: Colors.green,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      crAmt > 0 ? '₹ $crAmt' : '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.red,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),

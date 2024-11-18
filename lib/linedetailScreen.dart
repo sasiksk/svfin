@@ -15,9 +15,13 @@ class LineDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lineName = ref.watch(currentLineNameProvider);
 
+    if (lineName == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     void handleLineSelected(String partyName) async {
       ref.read(currentPartyNameProvider.notifier).state = partyName;
-
+      ref.read(currentLineNameProvider.notifier).state = lineName;
       // Fetch LenId for the selected party
       final lenId = await DatabaseHelper.getLenId(lineName!, partyName);
       ref.read(lenIdProvider.notifier).state = lenId;
@@ -30,7 +34,7 @@ class LineDetailScreen extends ConsumerWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-      );
+      ).then((_) {});
     }
 
     return Scaffold(

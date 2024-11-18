@@ -97,6 +97,8 @@ class CollectionScreen extends ConsumerWidget {
                 controller: _dateController,
                 labelText: "Date of Payment",
                 hintText: "Pick the date of payment",
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
               ),
               SizedBox(height: 10),
               TextFormField(

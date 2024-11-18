@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
+import 'package:svf/PartyDetailScreen.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
@@ -78,6 +79,11 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lending details updated successfully')),
         );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => PartyDetailScreen()),
+        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating lending details: $e')),
@@ -94,11 +100,13 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
   }
 
   void _calculateDueDate() {
-    final lentDate = DateTime.tryParse(_lentDateController.text);
-    final dueDays = int.tryParse(_dueDaysController.text) ?? 0;
-    if (lentDate != null) {
-      final dueDate = lentDate.add(Duration(days: dueDays));
-      _dueDateController.text = DateFormat('yyyy-MM-dd').format(dueDate);
+    if (_lentDateController.text.isNotEmpty &&
+        _dueDaysController.text.isNotEmpty) {
+      DateTime lentDate =
+          DateFormat('dd-MM-yyyy').parse(_lentDateController.text);
+      int dueDays = int.parse(_dueDaysController.text);
+      DateTime dueDate = lentDate.add(Duration(days: dueDays));
+      _dueDateController.text = DateFormat('dd-MM-yyyy').format(dueDate);
     }
   }
 
@@ -178,6 +186,8 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                   controller: _lentDateController,
                   labelText: "Lent Date",
                   hintText: "Pick a lent date",
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
                 ),
                 SizedBox(height: 10),
                 TextFormField(
@@ -195,6 +205,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     return null;
                   },
                   onChanged: (value) => _calculateDueDate(),
+                  onFieldSubmitted: (value) => _calculateDueDate(),
                 ),
                 SizedBox(height: 10),
                 CustomTextField(

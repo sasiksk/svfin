@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineScreen.dart';
 import 'package:svf/ReportScreen.dart';
+import 'package:svf/ReportScreen2.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/BottomNavigationBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
@@ -51,6 +52,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void handleLineSelected(String lineName) {
     ref.read(currentLineNameProvider.notifier).state = lineName;
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => LineDetailScreen()),
@@ -64,12 +66,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Finance Name: $financeName',
+        actions: [
+          IconButton(
+            icon: Icon(Icons.upload_file),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ReportScreen2()),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              // Handle close action
+            },
+          ),
+        ],
       ),
       drawer: buildDrawer(context),
       body: Column(
         children: [
           EmptyCard(
-            screenHeight: MediaQuery.of(context).size.height * 1.25,
+            screenHeight: MediaQuery.of(context).size.height * 1.50,
             screenWidth: MediaQuery.of(context).size.width,
             title: 'Finance Details',
             content: Column(
@@ -100,6 +119,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       'in Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
                       style: TextStyle(fontSize: 16),
                     ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ReportScreen2()),
+                          );
+                        },
+                        icon: Icon(Icons.report)),
+                    Text('View Report')
                   ],
                 ),
               ],
