@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/CollectionScreen.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LendingScreen.dart';
+import 'package:svf/PartyReportScreen.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/BottomNavigationBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
@@ -25,7 +26,7 @@ class PartyDetailScreen extends ConsumerWidget {
         children: [
           Center(
             child: EmptyCard(
-              screenHeight: MediaQuery.of(context).size.height * 1.50,
+              screenHeight: MediaQuery.of(context).size.height * 1.85,
               screenWidth: MediaQuery.of(context).size.width,
               title: 'Party Details',
               content: Consumer(
@@ -84,6 +85,25 @@ class PartyDetailScreen extends ConsumerWidget {
                                   'Days Remaining: ${data['daysRemaining']?.toString() ?? '0'}',
                                   style: TextStyle(fontSize: 16),
                                 ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                Partyreportscreen()),
+                                      );
+                                    },
+                                    icon: Icon(Icons.report)),
+                                Text('View Report')
                               ],
                             ),
                           ],

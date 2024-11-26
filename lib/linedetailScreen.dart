@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
+import 'package:svf/LineReportScreen.dart';
 import 'package:svf/PartyDetailScreen.dart';
+import 'package:svf/ReportScreen2.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
@@ -56,7 +58,7 @@ class LineDetailScreen extends ConsumerWidget {
               } else {
                 final data = snapshot.data!;
                 return EmptyCard(
-                  screenHeight: MediaQuery.of(context).size.height * 1.20,
+                  screenHeight: MediaQuery.of(context).size.height * 1.56,
                   screenWidth: MediaQuery.of(context).size.width,
                   title: 'Line Details',
                   content: Column(
@@ -87,6 +89,24 @@ class LineDetailScreen extends ConsumerWidget {
                             'In Line: ₹${data['totalDueAmt']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Linereportscreen()),
+                                );
+                              },
+                              icon: Icon(Icons.report)),
+                          Text('View Report')
                         ],
                       ),
                     ],

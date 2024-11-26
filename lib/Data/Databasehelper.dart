@@ -7,6 +7,18 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 
 class DatabaseHelper {
+  static Future<List<int>> getLenIdsByLineName(String lineName) async {
+    final db = await getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      columns: ['LenId'],
+      where: 'LineName = ?',
+      whereArgs: [lineName],
+    );
+
+    return result.map((row) => row['LenId'] as int).toList();
+  }
+
   static Future<String?> getPartyNameByLenId(int lenId) async {
     final db = await getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
