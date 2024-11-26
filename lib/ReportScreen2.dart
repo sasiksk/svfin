@@ -33,6 +33,8 @@ class _ReportScreen2State extends State<ReportScreen2> {
       List<Map<String, dynamic>> entries =
           await CollectionDB.getEntriesBetweenDates(startDate, endDate);
 
+      // Sort entries by date
+
       double totalYouGave = 0.0;
       double totalYouGot = 0.0;
 
@@ -105,7 +107,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Color.fromARGB(255, 71, 2, 92),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -115,7 +117,8 @@ class _ReportScreen2State extends State<ReportScreen2> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('TOTAL', style: TextStyle(color: Colors.grey)),
-                      Text('${_entries.length} Entries'),
+                      Text('${_entries.length} Entries',
+                          style: TextStyle(color: Colors.grey)),
                     ],
                   ),
                   Column(
@@ -135,7 +138,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 6),
 
             // Entries List
             Expanded(
@@ -180,7 +183,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                                   padding: EdgeInsets.symmetric(
                                       vertical: 16, horizontal: 16),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[200],
+                                    color: Color.fromARGB(255, 219, 247, 169),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
@@ -188,17 +191,17 @@ class _ReportScreen2State extends State<ReportScreen2> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        '${entry['Date']}',
+                                        '${DateFormat('dd-MM').format(DateFormat('dd-MM-yyyy').parse(entry['Date']))}',
                                         style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
+                                          fontSize: 14,
+                                        ),
                                       ),
                                       Text(
-                                        'Gave: ₹ ${totalCrAmt != 0.0 ? totalCrAmt : 'null'}',
+                                        '₹${totalCrAmt != 0.0 ? totalCrAmt : 0.0}',
                                         style: TextStyle(color: Colors.red),
                                       ),
                                       Text(
-                                        'Got: ₹ ${totalDrAmt != 0.0 ? totalDrAmt : 'null'}',
+                                        '₹${totalDrAmt != 0.0 ? totalDrAmt : 0.0}',
                                         style: TextStyle(color: Colors.green),
                                       ),
                                     ],
@@ -232,7 +235,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                                     children: [
                                       Text(
                                         entry['CrAmt'] != 0.0
-                                            ? '₹ ${entry['CrAmt']}'
+                                            ? '₹${entry['CrAmt']}'
                                             : '',
                                         style: TextStyle(color: Colors.red),
                                       ),
@@ -242,7 +245,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                                     children: [
                                       Text(
                                         entry['DrAmt'] != 0.0
-                                            ? '₹ ${entry['DrAmt']}'
+                                            ? '₹${entry['DrAmt']}'
                                             : '',
                                         style: TextStyle(color: Colors.green),
                                       ),

@@ -13,7 +13,7 @@ class CollectionScreen extends ConsumerWidget {
   final TextEditingController _amtCollectedController = TextEditingController();
 
   CollectionScreen() {
-    _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    _dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
 
   Future<Map<String, dynamic>> _fetchLendingData(int lenId) async {
