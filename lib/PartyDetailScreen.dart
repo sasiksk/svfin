@@ -198,7 +198,6 @@ class PartyDetailScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
                                     Text(
                                       drAmt > 0 ? '₹ $drAmt' : '',
                                       style: TextStyle(
@@ -207,8 +206,6 @@ class PartyDetailScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
-// Right-aligned "Dr"
                                   ],
                                 ),
                               ],

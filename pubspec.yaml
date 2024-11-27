@@ -45,6 +45,8 @@ dependencies:
   pdf: ^3.11.1
   open_file: ^3.5.10
   path_provider: ^2.1.5
+  flutter_launcher_icons: ^0.14.1
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -67,10 +69,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  #assets:
+    # - assets/app_icon.png
+    
+    
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/app_icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -98,3 +103,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"

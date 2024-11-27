@@ -65,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Finance Name: $financeName',
+        title: '$financeName',
         actions: [
           IconButton(
             icon: Icon(Icons.upload_file),
@@ -99,7 +99,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Text(
                       'Given: ₹${totalAmtGiven.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
                     ),
                     Text(
                       ' Profit: ₹${totalProfit.toStringAsFixed(2)}',
