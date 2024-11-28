@@ -123,7 +123,7 @@ class PartyDetailScreen extends ConsumerWidget {
                 Expanded(
                   child: Center(
                     child: Text(
-                      '                        You Gave',
+                      'You Gave',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.red,
@@ -164,6 +164,7 @@ class PartyDetailScreen extends ConsumerWidget {
                       final date = entry['Date'];
                       final crAmt = entry['CrAmt'] ?? 0.0;
                       final drAmt = entry['DrAmt'] ?? 0.0;
+                      final cid = entry['cid'];
 
                       // Update balance based on credit or debit amount
 
@@ -205,6 +206,54 @@ class PartyDetailScreen extends ConsumerWidget {
                                         color: Colors.green,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.drag_indicator),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ListTile(
+                                                    title: const Text('Update'),
+                                                    onTap: () {
+                                                      if (drAmt > 0) {
+                                                        Navigator.of(context)
+                                                            .push(
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                CollectionScreen(
+                                                              preloadedDate:
+                                                                  date,
+                                                              preloadedAmtCollected:
+                                                                  drAmt,
+                                                              preloadedCid: cid,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      }
+                                                    },
+                                                  ),
+                                                  ListTile(
+                                                    title: Text('Delete'),
+                                                    onTap: () {
+                                                      // Handle delete action
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),

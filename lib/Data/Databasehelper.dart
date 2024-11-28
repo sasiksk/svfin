@@ -119,6 +119,7 @@ class DatabaseHelper {
         // Create CollectionTable
         await db.execute('''
   CREATE TABLE Collection (
+    cid INTEGER PRIMARY KEY,
     LenId INTEGER NOT NULL,
     Date date NOT NULL,
     CrAmt REAL,
@@ -460,6 +461,27 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<void> updateCollection({
+    required int cid,
+    required int lenId,
+    required String date,
+    required double crAmt,
+    required double drAmt,
+  }) async {
+    final db = await DatabaseHelper.getDatabase();
+    await db.update(
+      'Collection',
+      {
+        'LenId': lenId,
+        'Date': date,
+        'CrAmt': crAmt,
+        'DrAmt': drAmt,
+      },
+      where: 'cid = ?',
+      whereArgs: [cid],
+    );
+  }
+
   static Future<List<Map<String, dynamic>>> getEntriesBetweenDates(
       DateTime startDate, DateTime endDate) async {
     final db = await DatabaseHelper.getDatabase();
@@ -477,6 +499,7 @@ class CollectionDB {
   }
 
   static Future<void> insertCollection({
+    required int cid,
     required int lenId,
     required String date,
     required double crAmt,

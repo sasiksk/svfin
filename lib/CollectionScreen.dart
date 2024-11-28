@@ -11,16 +11,26 @@ class CollectionScreen extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amtCollectedController = TextEditingController();
+  final int? preloadedCid;
+  final double? preloadedAmtCollected;
 
-  CollectionScreen() {
-    _dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+  CollectionScreen(
+      {String? preloadedDate, this.preloadedAmtCollected, this.preloadedCid}) {
+    if (preloadedDate != null) {
+      _dateController.text = preloadedDate;
+    } else {
+      _dateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    }
+    if (preloadedAmtCollected != null) {
+      _amtCollectedController.text = preloadedAmtCollected.toString();
+    }
   }
 
   Future<Map<String, dynamic>> _fetchLendingData(int lenId) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
       'Lending',
-      columns: ['dueAmt', 'amtCollected'],
+      columns: ['DueAmt', 'amtcollected'],
       where: 'LenId = ?',
       whereArgs: [lenId],
     );
@@ -30,6 +40,23 @@ class CollectionScreen extends ConsumerWidget {
     } else {
       throw Exception('No data found for LenId: $lenId');
     }
+  }
+
+  Future<void> _updateLendingData2(
+      int lenId, double newAmtCollected, double newDueAmt) async {
+    final updatedValues = {
+      'amtcollected': newAmtCollected,
+      'DueAmt': newDueAmt,
+      'status': newDueAmt == 0 ? 'passive' : 'active',
+    };
+
+    final db = await DatabaseHelper.getDatabase();
+    await db.update(
+      'Lending',
+      updatedValues,
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
   }
 
   Future<void> _updateLendingData(int lenId, double collectedAmt) async {
@@ -74,6 +101,14 @@ class CollectionScreen extends ConsumerWidget {
       lineName: lineName,
       updatedValues: {'Amtrecieved': updatedAmtRecieved},
     );
+  }
+
+  Future<int> _getNextCid() async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT MAX(cid) as maxCid FROM Collection');
+    final maxCid = result.first['maxCid'] as int?;
+    return (maxCid ?? 0) + 1;
   }
 
   @override
@@ -128,12 +163,49 @@ class CollectionScreen extends ConsumerWidget {
                       if (lenid != null && lineName != null) {
                         final lenStatus = ref.read(lenStatusProvider);
                         if (lenStatus == 'active') {
-                          await CollectionDB.insertCollection(
-                            lenId: lenid,
-                            date: date,
-                            crAmt: 0.0,
-                            drAmt: collectedAmt,
-                          );
+                          if (preloadedCid != null) {
+                            // Update existing record
+                            await CollectionDB.updateCollection(
+                              cid: preloadedCid!,
+                              lenId: lenid,
+                              date: date,
+                              crAmt: 0.0,
+                              drAmt: collectedAmt,
+                            );
+
+                            final lendingData = await _fetchLendingData(lenid);
+                            final double currentAmtCollected =
+                                lendingData['amtcollected'];
+                            final double currentDueAmt = lendingData['DueAmt'];
+
+                            // Calculate the new amtCollected and dueAmt
+                            final double newAmtCollected = currentAmtCollected +
+                                collectedAmt -
+                                preloadedAmtCollected!;
+                            print((currentAmtCollected +
+                                    collectedAmt -
+                                    preloadedAmtCollected!)
+                                .toString());
+                            print(preloadedAmtCollected.toString());
+                            final double newDueAmt = currentDueAmt +
+                                preloadedAmtCollected! -
+                                collectedAmt;
+
+                            // Update the Lending table
+                            await _updateLendingData2(
+                                lenid, newAmtCollected, newDueAmt);
+                          } else {
+                            // Insert new record
+                            final cid = await _getNextCid();
+                            await CollectionDB.insertCollection(
+                              cid: cid,
+                              lenId: lenid,
+                              date: date,
+                              crAmt: 0.0,
+                              drAmt: collectedAmt,
+                            );
+                          }
+
                           print(lineName);
                           print(partyName);
                           print(lenid);
