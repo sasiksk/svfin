@@ -245,6 +245,37 @@ class dbline {
 }
 
 class dbLending {
+  static Future<void> updateLendingAmounts({
+    required int lenId,
+    required double newAmtCollected,
+    required double newDueAmt,
+  }) async {
+    try {
+      final db = await DatabaseHelper.getDatabase();
+      final updatedValues = {
+        'amtcollected': newAmtCollected,
+        'DueAmt': newDueAmt,
+        'status': newDueAmt == 0 ? 'passive' : 'active',
+      };
+      print('Updating Lending table with values:');
+      print('LenId: $lenId');
+      print('newAmtCollected: $newAmtCollected');
+      print('newDueAmt: $newDueAmt');
+      print('status: ${updatedValues['status']}');
+      print(updatedValues.toString());
+
+      await db.update(
+        'Lending',
+        updatedValues,
+        where: 'LenId = ?',
+        whereArgs: [lenId],
+      );
+      print('Update successful');
+    } catch (e) {
+      print('Error updating Lending table: ${e.toString()}');
+    }
+  }
+
   static Future<Map<String, double>> getLineSums(String lineName) async {
     final db = await DatabaseHelper.getDatabase();
     final result = await db.rawQuery('''

@@ -42,23 +42,6 @@ class CollectionScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _updateLendingData2(
-      int lenId, double newAmtCollected, double newDueAmt) async {
-    final updatedValues = {
-      'amtcollected': newAmtCollected,
-      'DueAmt': newDueAmt,
-      'status': newDueAmt == 0 ? 'passive' : 'active',
-    };
-
-    final db = await DatabaseHelper.getDatabase();
-    await db.update(
-      'Lending',
-      updatedValues,
-      where: 'LenId = ?',
-      whereArgs: [lenId],
-    );
-  }
-
   Future<void> _updateLendingData(int lenId, double collectedAmt) async {
     final lendingData = await _fetchLendingData(lenId);
     print(lendingData.entries);
@@ -66,8 +49,8 @@ class CollectionScreen extends ConsumerWidget {
     final double amtCollected = (lendingData['amtcollected']);
 
     final updatedValues = {
-      'dueAmt': dueAmt1 - collectedAmt,
-      'amtCollected': amtCollected + collectedAmt,
+      'DueAmt': dueAmt1 - collectedAmt,
+      'amtcollected': amtCollected + collectedAmt,
       'status': (dueAmt1 - collectedAmt) == 0 ? 'passive' : 'active',
     };
 
@@ -116,6 +99,7 @@ class CollectionScreen extends ConsumerWidget {
     final partyName = ref.watch(currentPartyNameProvider);
     final lenid = ref.watch(lenIdProvider);
     final lineName = ref.watch(currentLineNameProvider);
+    final lenStatus = ref.watch(lenStatusProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -161,18 +145,9 @@ class CollectionScreen extends ConsumerWidget {
                           double.parse(_amtCollectedController.text);
 
                       if (lenid != null && lineName != null) {
-                        final lenStatus = ref.read(lenStatusProvider);
                         if (lenStatus == 'active') {
                           if (preloadedCid != null) {
-                            // Update existing record
-                            await CollectionDB.updateCollection(
-                              cid: preloadedCid!,
-                              lenId: lenid,
-                              date: date,
-                              crAmt: 0.0,
-                              drAmt: collectedAmt,
-                            );
-
+                            // Fetch the current amtCollected and dueAmt from Lending table
                             final lendingData = await _fetchLendingData(lenid);
                             final double currentAmtCollected =
                                 lendingData['amtcollected'];
@@ -182,18 +157,22 @@ class CollectionScreen extends ConsumerWidget {
                             final double newAmtCollected = currentAmtCollected +
                                 collectedAmt -
                                 preloadedAmtCollected!;
-                            print((currentAmtCollected +
-                                    collectedAmt -
-                                    preloadedAmtCollected!)
-                                .toString());
-                            print(preloadedAmtCollected.toString());
                             final double newDueAmt = currentDueAmt +
                                 preloadedAmtCollected! -
                                 collectedAmt;
 
-                            // Update the Lending table
-                            await _updateLendingData2(
-                                lenid, newAmtCollected, newDueAmt);
+                            await dbLending.updateLendingAmounts(
+                                lenId: lenid,
+                                newAmtCollected: newAmtCollected,
+                                newDueAmt: newDueAmt);
+                            // Update existing record in Collection table
+                            await CollectionDB.updateCollection(
+                              cid: preloadedCid!,
+                              lenId: lenid,
+                              date: date,
+                              crAmt: 0.0,
+                              drAmt: collectedAmt,
+                            );
                           } else {
                             // Insert new record
                             final cid = await _getNextCid();
@@ -204,13 +183,12 @@ class CollectionScreen extends ConsumerWidget {
                               crAmt: 0.0,
                               drAmt: collectedAmt,
                             );
+                            print(lineName);
+                            print(partyName);
+                            print(lenid);
+                            await _updateLendingData(lenid, collectedAmt);
+                            await _updateAmtRecieved(lineName, collectedAmt);
                           }
-
-                          print(lineName);
-                          print(partyName);
-                          print(lenid);
-                          await _updateLendingData(lenid, collectedAmt);
-                          await _updateAmtRecieved(lineName, collectedAmt);
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Form Submitted')),

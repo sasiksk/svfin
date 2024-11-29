@@ -33,7 +33,7 @@ class LineDetailScreen extends ConsumerWidget {
       ref.read(lenIdProvider.notifier).state = lenId;
       print(stat.toString());
 
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => PartyDetailScreen()),
       ).then((_) {});
