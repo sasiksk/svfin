@@ -31,13 +31,9 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
           'LenId': lentid,
           'amtgiven': amtGiven,
           'profit': profit,
-          'total': total,
           'Lentdate': _lentDateController.text,
           'duedays': int.parse(_dueDaysController.text),
-          'duedate': _dueDateController.text,
           'amtcollected': 0.0,
-          'DueAmt': total,
-          'Daysrem': int.parse(_dueDaysController.text),
           'status': 'active',
         };
 
@@ -60,19 +56,16 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
           final existingEntry = existingEntries.first;
           final double existingAmtGiven = existingEntry['Amtgiven'];
           final double existingProfit = existingEntry['Profit'];
-          final double existingTotalAmt = existingEntry['TotalAmt'];
 
           // Add new values to existing values
           final double newAmtGiven = existingAmtGiven + amtGiven;
           final double newProfit = existingProfit + profit;
-          final double newTotalAmt = existingTotalAmt + total;
 
           // Update the Line table with new values
           await dbline.updateLineAmounts(
             lineName: lineName,
             amtGiven: newAmtGiven,
             profit: newProfit,
-            totalAmt: newTotalAmt,
           );
         }
 

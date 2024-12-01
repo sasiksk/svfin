@@ -79,20 +79,15 @@ class DatabaseHelper {
         var batch = db.batch();
 
         // Create LineTable
-        // ... rest of the code
-
-// Create LineTable
         batch.execute('''
   CREATE TABLE Line (
     Linename TEXT PRIMARY KEY,
     Amtgiven REAL,
     Profit REAL,
-    TotalAmt REAL,
+    expense REAL,
     Amtrecieved REAL
   )
 ''');
-
-// ... rest of the code
 
         // Create LendingTable
         await db.execute('''
@@ -102,15 +97,14 @@ class DatabaseHelper {
           PartyName TEXT NOT NULL,
           PartyAdd Text,
           PartyPhnone Text,
+          sms bool,
           amtgiven REAL NOT NULL,
           profit REAL,
-          total REAL,
+           amtcollected REAL,
           Lentdate date,
     duedays INTEGER,
-    duedate date,
-    amtcollected REAL,
-    DueAmt REAL,
-    Daysrem INTEGER,
+    
+   
     status TEXT,
     PRIMARY KEY (LineName, PartyName)  
   )
@@ -187,7 +181,6 @@ class dbline {
     required String lineName,
     required double amtGiven,
     required double profit,
-    required double totalAmt,
   }) async {
     final db = await DatabaseHelper.getDatabase();
 
@@ -197,7 +190,6 @@ class dbline {
       {
         'Amtgiven': amtGiven,
         'Profit': profit,
-        'TotalAmt': totalAmt,
       },
       where: 'LOWER(Linename) = ?',
       whereArgs: [lineName.toLowerCase()],
@@ -225,7 +217,7 @@ class dbline {
           'Linename': lineName,
           'Amtgiven': 0.0,
           'Profit': 0.0,
-          'TotalAmt': 0.0,
+          'expense': 0.0,
           'Amtrecieved': 0.0,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -280,10 +272,9 @@ class dbLending {
     final db = await DatabaseHelper.getDatabase();
     final result = await db.rawQuery('''
       SELECT 
-        SUM(AmtGiven) as totalAmtGiven, 
+        SUM(Amtgiven) as totalAmtGiven, 
         SUM(Profit) as totalProfit, 
-        SUM(AmtCollected) as totalAmtCollected, 
-        SUM(DueAmt) as totalDueAmt 
+        SUM(Amtcollected) as totalAmtCollected 
       FROM Lending
       WHERE LineName = ?
     ''', [lineName]);
@@ -294,14 +285,12 @@ class dbLending {
         'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
         'totalAmtCollected':
             result.first['totalAmtCollected'] as double? ?? 0.0,
-        'totalDueAmt': result.first['totalDueAmt'] as double? ?? 0.0,
       };
     } else {
       return {
         'totalAmtGiven': 0.0,
         'totalProfit': 0.0,
         'totalAmtCollected': 0.0,
-        'totalDueAmt': 0.0,
       };
     }
   }
@@ -310,12 +299,10 @@ class dbLending {
     final db = await DatabaseHelper.getDatabase();
     final result = await db.rawQuery('''
       SELECT 
-        SUM(AmtGiven) as totalAmtGiven, 
+        SUM(Amtgiven) as totalAmtGiven, 
         SUM(Profit) as totalProfit, 
-        SUM(AmtCollected) as totalAmtCollected, 
-        SUM(DueAmt) as totalDueAmt,
-        MAX(DueDate) as dueDate,
-        MIN(Daysrem) as daysRemaining
+        SUM(Amtcollected) as totalAmtCollected
+      
       FROM Lending
       WHERE LenId = ?
     ''', [Lenid]);
@@ -326,50 +313,13 @@ class dbLending {
         'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
         'totalAmtCollected':
             result.first['totalAmtCollected'] as double? ?? 0.0,
-        'totalDueAmt': result.first['totalDueAmt'] as double? ?? 0.0,
-        'dueDate': result.first['dueDate'] as String? ?? '',
-        'daysRemaining': result.first['daysRemaining'] as int? ?? 0,
       };
     } else {
       return {
         'totalAmtGiven': 0.0,
         'totalProfit': 0.0,
         'totalAmtCollected': 0.0,
-        'totalDueAmt': 0.0,
-        'dueDate': '',
-        'daysRemaining': 0,
       };
-    }
-  }
-
-  static Future<void> updateDaysRem() async {
-    final db = await DatabaseHelper.getDatabase();
-    final List<Map<String, dynamic>> lendingEntries = await db.query(
-      'Lending',
-      where: 'status = ?',
-      whereArgs: ['active'],
-    );
-
-    final DateTime today = DateTime.now();
-    final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-
-    for (var entry in lendingEntries) {
-      final String? lentDateStr = entry['Lentdate'] as String?;
-      final String? dueDateStr = entry['duedate'] as String?;
-
-      if (lentDateStr != null && dueDateStr != null) {
-        final DateTime lentDate = dateFormat.parse(lentDateStr);
-        final DateTime dueDate = dateFormat.parse(dueDateStr);
-
-        final int daysRem = dueDate.difference(today).inDays + 1;
-
-        await db.update(
-          'Lending',
-          {'Daysrem': daysRem},
-          where: 'LenId = ?',
-          whereArgs: [entry['LenId']],
-        );
-      }
     }
   }
 
@@ -393,6 +343,7 @@ class dbLending {
     required String partyPhoneNumber,
     required String address,
     required int lenId,
+    required bool sms, // Add this parameter
   }) async {
     final db = await DatabaseHelper.getDatabase();
 
@@ -427,18 +378,15 @@ class dbLending {
         'LenId': lenId,
         'LineName': lineName,
         'PartyName': partyName,
-        'PartyPhnone': partyPhoneNumber,
         'PartyAdd': address,
+        'PartyPhnone': partyPhoneNumber,
         'amtgiven': 0.0,
         'profit': 0.0,
-        'total': 0.0,
+        'amtcollected': 0.0,
         'Lentdate': null,
         'duedays': 0,
-        'duedate': null,
-        'amtcollected': 0.0,
-        'DueAmt': 0.0,
-        'Daysrem': 0,
         'status': 'passive',
+        'sms': sms ? 1 : 0, // Store as integer (1 for true, 0 for false)
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -476,7 +424,7 @@ class dbLending {
     );
 
     final lentDate = updatedValues['Lentdate'];
-    final total = updatedValues['total'];
+    final total = updatedValues['amtgiven'] + updatedValues['profit'];
     print(lenId.toString());
     await db.insert(
       'Collection',

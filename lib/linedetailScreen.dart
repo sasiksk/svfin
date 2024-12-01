@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineReportScreen.dart';
 import 'package:svf/PartyDetailScreen.dart';
-import 'package:svf/ReportScreen2.dart';
+
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
@@ -68,11 +68,11 @@ class LineDetailScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Given: ₹${data['totalAmtGiven']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Given: ₹${data['Amtgiven']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(
-                            'Profit: ₹${data['totalProfit']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Profit: ₹${data['Profit']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
                         ],
@@ -82,31 +82,9 @@ class LineDetailScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Collected: ₹${data['Amtrecieved']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
-                          Text(
-                            'In Line: ₹${data['totalDueAmt']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Linereportscreen()),
-                                );
-                              },
-                              icon: Icon(Icons.report)),
-                          Text('View Report')
                         ],
                       ),
                     ],

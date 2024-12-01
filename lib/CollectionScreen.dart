@@ -30,7 +30,7 @@ class CollectionScreen extends ConsumerWidget {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
       'Lending',
-      columns: ['DueAmt', 'amtcollected'],
+      columns: [' amtgiven', 'profit', 'amtcollected'],
       where: 'LenId = ?',
       whereArgs: [lenId],
     );
@@ -45,13 +45,13 @@ class CollectionScreen extends ConsumerWidget {
   Future<void> _updateLendingData(int lenId, double collectedAmt) async {
     final lendingData = await _fetchLendingData(lenId);
     print(lendingData.entries);
-    final double dueAmt1 = (lendingData['DueAmt']);
+
     final double amtCollected = (lendingData['amtcollected']);
+    final double amtgiven = (lendingData['amtgiven']) + (lendingData['profit']);
 
     final updatedValues = {
-      'DueAmt': dueAmt1 - collectedAmt,
       'amtcollected': amtCollected + collectedAmt,
-      'status': (dueAmt1 - collectedAmt) == 0 ? 'passive' : 'active',
+      'status': (amtgiven - collectedAmt) == 0 ? 'passive' : 'active',
     };
 
     await dbLending.updateDueAmt(

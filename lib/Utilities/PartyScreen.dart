@@ -29,6 +29,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late String _lineName;
+  bool _sms = false; // Default value for SMS
 
   @override
   void initState() {
@@ -51,6 +52,9 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
     _partyPhoneNumberController.clear();
     _partyidController.clear();
     _addressController.clear();
+    setState(() {
+      _sms = false; // Reset SMS to default value
+    });
   }
 
   Future<void> _submitForm() async {
@@ -62,6 +66,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
           partyName: _partyNameController.text,
           partyPhoneNumber: _partyPhoneNumberController.text,
           address: _addressController.text,
+          sms: _sms,
         );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Party added successfully')),
@@ -151,6 +156,39 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     }
                     return null;
                   },
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  'SMS Notifications',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<bool>(
+                        title: Text('Yes'),
+                        value: true,
+                        groupValue: _sms,
+                        onChanged: (value) {
+                          setState(() {
+                            _sms = value!;
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<bool>(
+                        title: Text('No'),
+                        value: false,
+                        groupValue: _sms,
+                        onChanged: (value) {
+                          setState(() {
+                            _sms = value!;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16.0),
                 Row(

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineScreen.dart';
-import 'package:svf/ReportScreen.dart';
+
 import 'package:svf/ReportScreen2.dart';
 import 'package:svf/Utilities/AppBar.dart';
-import 'package:svf/Utilities/BottomNavigationBar.dart';
+
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/LineCard.dart';
 import 'package:svf/Utilities/drawer.dart';
@@ -30,7 +30,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     loadLineNames();
-    dbLending.updateDaysRem();
+
     loadLineDetails();
   }
 

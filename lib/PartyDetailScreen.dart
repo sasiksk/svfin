@@ -67,25 +67,12 @@ class PartyDetailScreen extends ConsumerWidget {
                                   'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
                                   style: TextStyle(fontSize: 16),
                                 ),
-                                Text(
-                                  'Balance: ₹${data['totalDueAmt']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
                               ],
                             ),
                             SizedBox(height: 8),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Due Date: ${data['dueDate'] ?? ''}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                Text(
-                                  'Days Remaining: ${data['daysRemaining']?.toString() ?? '0'}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ],
+                              children: [],
                             ),
                             SizedBox(
                               height: 5,
