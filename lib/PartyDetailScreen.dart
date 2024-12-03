@@ -266,32 +266,35 @@ class PartyDetailScreen extends ConsumerWidget {
                                                                       await dbline
                                                                           .fetchAmtRecieved(
                                                                               linename!);
+                                                                  final newamtrecived =
+                                                                      amtRecieved_Line +
+                                                                          -drAmt;
+                                                                  await dbline.updateLine(
+                                                                      lineName:
+                                                                          linename,
+                                                                      updatedValues: {
+                                                                        'Amtrecieved':
+                                                                            newamtrecived
+                                                                      });
+
                                                                   final double
                                                                       currentAmtCollected =
                                                                       lendingData[
                                                                           'amtcollected'];
-                                                                  final double
-                                                                      currentgivenamt =
-                                                                      lendingData[
-                                                                          'amtgiven'];
 
                                                                   // Calculate the new amtCollected and dueAmt
                                                                   final double
                                                                       newAmtCollected =
                                                                       currentAmtCollected -
                                                                           drAmt;
-                                                                  final newamtgiven =
-                                                                      currentgivenamt +
-                                                                          drAmt;
+
                                                                   final updatedValues =
                                                                       {
                                                                     'amtcollected':
                                                                         newAmtCollected,
-                                                                    'amtgiven':
-                                                                        newamtgiven,
                                                                   };
                                                                   //invoke dblending.updatelending
-                                                                  await dbLending.updateLending(
+                                                                  await dbLending.updateAmtCollectedAndGiven(
                                                                       lineName:
                                                                           linename,
                                                                       partyName:

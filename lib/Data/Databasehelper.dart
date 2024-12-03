@@ -141,7 +141,7 @@ class dbline {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
       'Line',
-      columns: ['Amtrecieved'],
+      columns: ['Amtrecieved', 'Amtgiven', 'Profit'],
       where: 'Linename = ?',
       whereArgs: [lineName],
     );
@@ -253,6 +253,112 @@ class dbline {
 }
 
 class dbLending {
+  static Future<void> deleteLendingAndCollections(
+      int lenId, String linename) async {
+    final db = await DatabaseHelper.getDatabase();
+
+    // Delete all entries from the Collection table for the given lenId
+    await db.delete(
+      'Collection',
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    // get the amtgiven and profit and amtcollected for the given lenId
+    final lendingData = await fetchLendingData(lenId);
+    final amtgiven = lendingData['amtgiven'];
+    final profit = lendingData['profit'];
+    final amtcollected = lendingData['amtcollected'];
+
+    await db.delete(
+      'Lending',
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    //get the amtgiven ,profit and amtrecieved for the given line table for line name
+    final lineData = await db.query(
+      'Line',
+      columns: ['Amtgiven', 'Profit', 'Amtrecieved'],
+      where: 'Linename = ?',
+      whereArgs: [linename],
+    );
+
+    if (lineData.isNotEmpty) {
+      double lineamtgiven = lineData.first['Amtgiven'] as double? ?? 0.0;
+      double lineprofit = lineData.first['Profit'] as double? ?? 0.0;
+      double lineamtrecieved = lineData.first['Amtrecieved'] as double? ?? 0.0;
+
+      lineamtgiven -= amtgiven;
+      lineprofit -= profit;
+      lineamtrecieved -= amtcollected;
+
+      await db.update(
+        'Line',
+        {
+          'Amtgiven': lineamtgiven,
+          'Profit': lineprofit,
+          'Amtrecieved': lineamtrecieved,
+        },
+        where: 'Linename = ?',
+        whereArgs: [linename],
+      );
+    } else {
+      throw Exception('No data found for Linename: $linename');
+    }
+
+    //update the line table with the new values
+  }
+
+  static Future<void> updatePartyDetails({
+    required String lineName,
+    required String partyName,
+    required int lenId,
+    required Map<String, dynamic> updatedValues,
+  }) async {
+    final db = await DatabaseHelper.getDatabase();
+
+    await db.update(
+      'Lending',
+      updatedValues,
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getPartyDetails(int lenId) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      return null;
+    }
+  }
+
+  static Future<void> updateAmtCollectedAndGiven({
+    required String lineName,
+    required String partyName,
+    required int lenId,
+    required Map<String, double> updatedValues,
+  }) async {
+    final db = await DatabaseHelper.getDatabase();
+
+    // Fetch current values
+
+    await db.update(
+      'Lending',
+      updatedValues,
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+  }
+
   static Future<Map<String, dynamic>> fetchLendingData(int lenId) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(

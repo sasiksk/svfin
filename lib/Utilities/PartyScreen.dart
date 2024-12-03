@@ -29,12 +29,37 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late String _lineName;
+
   bool _sms = false; // Default value for SMS
 
   @override
   void initState() {
     super.initState();
-    _lineName = ref.read(currentLineNameProvider.state).state ?? '';
+
+    _lineName = ref.read(currentLineNameProvider) ?? '';
+
+    if (widget.partyName != null) {
+      _loadPartyDetails();
+    }
+  }
+
+  Future<void> _loadPartyDetails() async {
+    final linename = ref.read(currentLineNameProvider);
+    final partyName = ref.read(currentPartyNameProvider);
+    final lenId = ref.read(lenIdProvider);
+
+    if (lenId != null) {
+      final partyDetails = await dbLending.getPartyDetails(lenId);
+      if (partyDetails != null) {
+        setState(() {
+          _partyidController.text = partyDetails['LenId'].toString();
+          _partyNameController.text = partyDetails['PartyName'];
+          _partyPhoneNumberController.text = partyDetails['PartyPhnone'];
+          _addressController.text = partyDetails['PartyAdd'];
+          _sms = partyDetails['sms'] == 1;
+        });
+      }
+    }
   }
 
   @override
@@ -58,19 +83,45 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
   }
 
   Future<void> _submitForm() async {
+    final linename = ref.read(currentLineNameProvider);
+
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        await dbLending.insertParty(
-          lenId: int.parse(_partyidController.text),
-          lineName: _lineName,
-          partyName: _partyNameController.text,
-          partyPhoneNumber: _partyPhoneNumberController.text,
-          address: _addressController.text,
-          sms: _sms,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Party added successfully')),
-        );
+        final lenId = int.parse(_partyidController.text);
+        final partyDetails = {
+          'LineName': _lineName,
+          'PartyName': _partyNameController.text,
+          'PartyPhnone': _partyPhoneNumberController.text,
+          'PartyAdd': _addressController.text,
+          'sms': _sms ? 1 : 0,
+        };
+
+        if (widget.partyName != null) {
+          // Update existing entry
+          await dbLending.updatePartyDetails(
+            lineName: linename!,
+            partyName: _partyNameController.text,
+            lenId: lenId,
+            updatedValues: partyDetails,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Party updated successfully')),
+          );
+        } else {
+          // Insert new entry
+          await dbLending.insertParty(
+            lenId: lenId,
+            lineName: _lineName,
+            partyName: _partyNameController.text,
+            partyPhoneNumber: _partyPhoneNumberController.text,
+            address: _addressController.text,
+            sms: _sms,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Party added successfully')),
+          );
+        }
+
         _resetForm();
         Navigator.pushReplacement(
           context,
@@ -200,7 +251,8 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                             _submitForm();
                           }
                         },
-                        child: Text('Submit'),
+                        child: Text(
+                            widget.partyName != null ? 'Update' : 'Submit'),
                       ),
                     ),
                     SizedBox(width: 16.0),

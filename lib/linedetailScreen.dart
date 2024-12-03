@@ -118,11 +118,50 @@ class LineDetailScreen extends ConsumerWidget {
                   return ListView.builder(
                     itemCount: partyNames.length,
                     itemBuilder: (context, index) {
-                      return LineCard(
-                        lineName: partyNames[index],
-                        screenWidth: MediaQuery.of(context).size.width,
-                        onLineSelected: () =>
-                            handleLineSelected(partyNames[index]),
+                      return ListTile(
+                        title: LineCard(
+                          lineName: partyNames[index],
+                          screenWidth: MediaQuery.of(context).size.width,
+                          onLineSelected: () =>
+                              handleLineSelected(partyNames[index]),
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (String value) async {
+                            if (value == 'Update') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PartyScreen(
+                                    partyName: partyNames[index],
+                                    // Pass other necessary details if needed
+                                  ),
+                                ),
+                              );
+                            } else if (value == 'Delete') {
+                              final lenId = ref.read(lenIdProvider);
+                              final linename =
+                                  ref.read(currentLineNameProvider);
+                              if (lenId != null) {
+                                await dbLending.deleteLendingAndCollections(
+                                    lenId, linename!);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Party and related collections deleted successfully')),
+                                );
+                                // Optionally, refresh the list or navigate back
+                              }
+                            }
+                          },
+                          itemBuilder: (BuildContext context) {
+                            return {'Update', 'Delete'}.map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(choice),
+                              );
+                            }).toList();
+                          },
+                        ),
                       );
                     },
                   );

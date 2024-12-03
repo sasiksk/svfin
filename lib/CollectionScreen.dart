@@ -26,24 +26,8 @@ class CollectionScreen extends ConsumerWidget {
     }
   }
 
-  Future<Map<String, dynamic>> _fetchLendingData(int lenId) async {
-    final db = await DatabaseHelper.getDatabase();
-    final List<Map<String, dynamic>> result = await db.query(
-      'Lending',
-      columns: [' amtgiven', 'profit', 'amtcollected'],
-      where: 'LenId = ?',
-      whereArgs: [lenId],
-    );
-
-    if (result.isNotEmpty) {
-      return result.first;
-    } else {
-      throw Exception('No data found for LenId: $lenId');
-    }
-  }
-
   Future<void> _updateLendingData(int lenId, double collectedAmt) async {
-    final lendingData = await _fetchLendingData(lenId);
+    final lendingData = await dbLending.fetchLendingData(lenId);
     print(lendingData.entries);
 
     final double amtCollected = (lendingData['amtcollected']);
@@ -60,24 +44,8 @@ class CollectionScreen extends ConsumerWidget {
     );
   }
 
-  Future<double> _fetchAmtRecieved(String lineName) async {
-    final db = await DatabaseHelper.getDatabase();
-    final List<Map<String, dynamic>> result = await db.query(
-      'Line',
-      columns: ['Amtrecieved'],
-      where: 'Linename = ?',
-      whereArgs: [lineName],
-    );
-
-    if (result.isNotEmpty) {
-      return (result.first['Amtrecieved'] ?? 0.0) as double;
-    } else {
-      throw Exception('No data found for LineName: $lineName');
-    }
-  }
-
   Future<void> _updateAmtRecieved(String lineName, double collectedAmt) async {
-    final amtRecieved = await _fetchAmtRecieved(lineName);
+    final amtRecieved = await dbline.fetchAmtRecieved(lineName);
     final updatedAmtRecieved = amtRecieved + collectedAmt;
 
     await dbline.updateLine(
@@ -166,7 +134,7 @@ class CollectionScreen extends ConsumerWidget {
                                     : 'active';
 
                             final amtRecieved_Line =
-                                await _fetchAmtRecieved(lineName);
+                                await dbline.fetchAmtRecieved(lineName);
                             final newamtrecived = amtRecieved_Line +
                                 collectedAmt -
                                 preloadedAmtCollected!;
