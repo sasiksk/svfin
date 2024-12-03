@@ -15,6 +15,7 @@ import 'finance_provider.dart';
 class PartyDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final linename = ref.watch(currentLineNameProvider);
     final partyName = ref.watch(currentPartyNameProvider);
     final lenId = ref.watch(lenIdProvider);
 
@@ -230,9 +231,101 @@ class PartyDetailScreen extends ConsumerWidget {
                                                   ListTile(
                                                     title: Text('Delete'),
                                                     onTap: () {
-                                                      // Handle delete action
-                                                      Navigator.of(context)
-                                                          .pop();
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                'Confirm Delete'),
+                                                            content: Text(
+                                                                'Are you sure you want to delete this entry?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                child: Text(
+                                                                    'Cancel'),
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                              ),
+                                                              TextButton(
+                                                                child:
+                                                                    Text('OK'),
+                                                                onPressed:
+                                                                    () async {
+                                                                  await CollectionDB
+                                                                      .deleteEntry(
+                                                                          cid);
+                                                                  final lendingData =
+                                                                      await dbLending
+                                                                          .fetchLendingData(
+                                                                              lenId);
+                                                                  final amtRecieved_Line =
+                                                                      await dbline
+                                                                          .fetchAmtRecieved(
+                                                                              linename!);
+                                                                  final double
+                                                                      currentAmtCollected =
+                                                                      lendingData[
+                                                                          'amtcollected'];
+                                                                  final double
+                                                                      currentgivenamt =
+                                                                      lendingData[
+                                                                          'amtgiven'];
+
+                                                                  // Calculate the new amtCollected and dueAmt
+                                                                  final double
+                                                                      newAmtCollected =
+                                                                      currentAmtCollected -
+                                                                          drAmt;
+                                                                  final newamtgiven =
+                                                                      currentgivenamt +
+                                                                          drAmt;
+                                                                  final updatedValues =
+                                                                      {
+                                                                    'amtcollected':
+                                                                        newAmtCollected,
+                                                                    'amtgiven':
+                                                                        newamtgiven,
+                                                                  };
+                                                                  //invoke dblending.updatelending
+                                                                  await dbLending.updateLending(
+                                                                      lineName:
+                                                                          linename,
+                                                                      partyName:
+                                                                          partyName!,
+                                                                      lenId:
+                                                                          lenId,
+                                                                      updatedValues:
+                                                                          updatedValues);
+
+                                                                  //get the lenid from the provider
+                                                                  //get the current line name from the provider
+
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop(); // Close the confirmation dialog
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop(); // Close the options dialog
+                                                                  // Refresh the screen
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pushReplacement(
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              PartyDetailScreen(),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
                                                     },
                                                   ),
                                                 ],

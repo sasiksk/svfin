@@ -148,23 +148,38 @@ class CollectionScreen extends ConsumerWidget {
                         if (lenStatus == 'active') {
                           if (preloadedCid != null) {
                             // Fetch the current amtCollected and dueAmt from Lending table
-                            final lendingData = await _fetchLendingData(lenid);
+                            final lendingData =
+                                await dbLending.fetchLendingData(lenid);
+
                             final double currentAmtCollected =
                                 lendingData['amtcollected'];
-                            final double currentDueAmt = lendingData['DueAmt'];
+                            final double currentgivenamt =
+                                lendingData['amtgiven'];
 
                             // Calculate the new amtCollected and dueAmt
                             final double newAmtCollected = currentAmtCollected +
                                 collectedAmt -
                                 preloadedAmtCollected!;
-                            final double newDueAmt = currentDueAmt +
-                                preloadedAmtCollected! -
-                                collectedAmt;
+                            final String status =
+                                currentgivenamt - newAmtCollected == 0
+                                    ? 'passive'
+                                    : 'active';
+
+                            final amtRecieved_Line =
+                                await _fetchAmtRecieved(lineName);
+                            final newamtrecived = amtRecieved_Line +
+                                collectedAmt -
+                                preloadedAmtCollected!;
+                            await dbline.updateLine(
+                                lineName: lineName,
+                                updatedValues: {'Amtrecieved': newamtrecived});
 
                             await dbLending.updateLendingAmounts(
                                 lenId: lenid,
                                 newAmtCollected: newAmtCollected,
-                                newDueAmt: newDueAmt);
+                                status: status);
+
+                            //newDueAmt: newDueAmt);
                             // Update existing record in Collection table
                             await CollectionDB.updateCollection(
                               cid: preloadedCid!,

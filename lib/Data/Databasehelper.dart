@@ -137,6 +137,22 @@ class DatabaseHelper {
 //LINE OPERATIONS
 
 class dbline {
+  static Future<double> fetchAmtRecieved(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Line',
+      columns: ['Amtrecieved'],
+      where: 'Linename = ?',
+      whereArgs: [lineName],
+    );
+
+    if (result.isNotEmpty) {
+      return (result.first['Amtrecieved'] ?? 0.0) as double;
+    } else {
+      throw Exception('No data found for LineName: $lineName');
+    }
+  }
+
   static Future<Map<String, double>> allLineDetails() async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.rawQuery('''
@@ -237,24 +253,30 @@ class dbline {
 }
 
 class dbLending {
+  static Future<Map<String, dynamic>> fetchLendingData(int lenId) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      columns: [' amtgiven', 'profit', 'amtcollected'],
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      throw Exception('No data found for LenId: $lenId');
+    }
+  }
+
   static Future<void> updateLendingAmounts({
     required int lenId,
     required double newAmtCollected,
-    required double newDueAmt,
+    required String status,
   }) async {
     try {
       final db = await DatabaseHelper.getDatabase();
-      final updatedValues = {
-        'amtcollected': newAmtCollected,
-        'DueAmt': newDueAmt,
-        'status': newDueAmt == 0 ? 'passive' : 'active',
-      };
-      print('Updating Lending table with values:');
-      print('LenId: $lenId');
-      print('newAmtCollected: $newAmtCollected');
-      print('newDueAmt: $newDueAmt');
-      print('status: ${updatedValues['status']}');
-      print(updatedValues.toString());
+      final updatedValues = {'amtcollected': newAmtCollected, 'status': status};
 
       await db.update(
         'Lending',
@@ -440,6 +462,15 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<void> deleteEntry(int cid) async {
+    final db = await DatabaseHelper.getDatabase();
+    await db.delete(
+      'Collection',
+      where: 'cid = ?',
+      whereArgs: [cid],
+    );
+  }
+
   static Future<void> updateCollection({
     required int cid,
     required int lenId,
