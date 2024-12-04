@@ -19,15 +19,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 24,
-          color: Colors.white,
+          fontSize: 22,
+          //  color: Colors.white,
         ),
       ),
       backgroundColor: Colors.transparent,
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 235, 232, 103), Colors.teal],
+            colors: [Colors.blueAccent, Colors.blue, Colors.lightBlueAccent],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

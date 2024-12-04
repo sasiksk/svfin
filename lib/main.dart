@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svf/finance_provider.dart';
 import 'package:svf/home_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,11 +26,63 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        fontFamily: 'Times New Roman',
         scaffoldBackgroundColor: Color.fromARGB(255, 243, 242, 241),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.black),
-          bodyMedium: TextStyle(color: Colors.black),
+        primarySwatch: Colors.blue, // Set the primary color to purple
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blueAccent, // Purple color
+          foregroundColor: Colors.white,
+          elevation: 0,
+          titleTextStyle: GoogleFonts.tinos(
+            textStyle: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        textTheme: GoogleFonts.tinosTextTheme(
+          Theme.of(context).textTheme,
+        ).copyWith(
+          bodyLarge: TextStyle(color: Colors.black, fontSize: 18),
+          bodyMedium: TextStyle(color: Colors.black, fontSize: 16),
+          headlineSmall: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          labelLarge: TextStyle(
+            color: Color.fromARGB(255, 255, 215, 0), // Golden color
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            fontFamily: GoogleFonts.tinos().fontFamily,
+          ),
+        ),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.blue, // Purple color
+          textTheme: ButtonTextTheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(color: Colors.blue), // Purple color
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide:
+                BorderSide(color: Colors.blue, width: 2), // Purple color
+          ),
+          labelStyle: TextStyle(color: Colors.blue), // Purple color
+        ),
+        cardTheme: CardTheme(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          elevation: 10.0,
         ),
       ),
       home: isFirstLaunch ? const SplashScreen() : const HomeScreen(),
@@ -157,13 +210,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           builder: (context) => AlertDialog(
                             backgroundColor: Color.fromARGB(255, 210, 240, 223),
                             title: const Text('Message'),
-                            content:
-                                const Text('Kindly Enter Your Finance Name',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Times New Roman',
-                                    )),
+                            content: Text('Kindly Enter Your Finance Name',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: GoogleFonts.tinos().fontFamily,
+                                )),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
@@ -186,12 +238,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         );
                       }
                     },
-                    child: const Text(
+                    child: Text(
                       'OK',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Times New Roman',
+                        fontFamily: GoogleFonts.tinos().fontFamily,
                       ),
                     ),
                   ),

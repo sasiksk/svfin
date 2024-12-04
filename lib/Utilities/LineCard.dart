@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LineCard extends StatelessWidget {
   final String lineName;
@@ -28,22 +29,24 @@ class LineCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
               gradient: LinearGradient(
                 colors: [
-                  Colors.teal.shade400,
-                  Colors.teal.shade900,
+                  Colors.blueAccent,
+                  Colors.blue,
+                  Colors.lightBlueAccent
                 ], // Gradient background
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(
-                  20.0), // Increased padding for consistency
+              padding:
+                  const EdgeInsets.all(10), // Increased padding for consistency
               child: Text(
                 lineName,
                 textAlign: TextAlign.justify,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: GoogleFonts.tinos().fontFamily, // Set font family
                   color: Colors.white, // White text color
                 ),
               ),

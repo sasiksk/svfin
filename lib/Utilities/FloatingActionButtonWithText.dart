@@ -23,9 +23,14 @@ class FloatingActionButtonWithText extends StatelessWidget {
           MaterialPageRoute(builder: (context) => navigateTo),
         );
       },
-      icon: icon != null ? Icon(icon) : null,
-      label: Text(label),
-      backgroundColor: Colors.teal,
+      icon: icon != null
+          ? Icon(
+              icon,
+              color: Colors.white,
+            )
+          : null,
+      label: Text(label, style: TextStyle(fontSize: 14, color: Colors.white)),
+      backgroundColor: Colors.blue.shade400, // Set the background color to blue
       heroTag: heroTag, // Set the heroTag if provided
     );
   }

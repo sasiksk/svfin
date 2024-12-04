@@ -130,7 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: Column(
         children: [
           EmptyCard(
-            screenHeight: MediaQuery.of(context).size.height * 1.50,
+            screenHeight: MediaQuery.of(context).size.height * 1.15,
             screenWidth: MediaQuery.of(context).size.width,
             title: 'Finance Details',
             content: Column(
@@ -143,30 +143,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       'Given: ₹${totalAmtGiven.toStringAsFixed(2)}',
                       style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white),
+                          fontWeight: FontWeight.w900,
+                          color: const Color.fromARGB(255, 255, 255, 255)),
                     ),
                     Text(
                       ' Profit: ₹${totalProfit.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: const Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       ' Received: ₹${totalAmtRecieved.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: const Color.fromARGB(255, 255, 255, 255)),
                     ),
                     Text(
-                      'in Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 16),
+                      'In Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: const Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
-                Row(
+                /*Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
@@ -180,21 +189,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icon(Icons.report)),
                     Text('View Report')
                   ],
-                ),
+                ),*/
               ],
             ),
           ),
           const SizedBox(
             height: 3,
           ),
-          Text(
-            'Line List ',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors
-                  .black, // Use Colors.black or Colors.grey[800] for contrast
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              height: 50, // Adjust the height as needed
+              child: TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      Icons.add_chart_outlined,
+                      color: Colors.blue,
+                    ),
+                    tooltip: 'View Report',
+                    onPressed: () {
+                      // Perform action
+                    },
+                  ),
+                  hintText: 'Search line',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: (value) {
+                  // Handle search logic here
+                },
+              ),
             ),
           ),
           Expanded(
