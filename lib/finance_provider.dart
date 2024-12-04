@@ -107,3 +107,7 @@ class LenStatusNotifier extends StateNotifier<String> {
     await prefs.setString('lenStatus', status);
   }
 }
+
+final financeNameProvider = StateProvider<String>((ref) {
+  return 'Default Finance Name';
+});

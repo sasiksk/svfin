@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineScreen.dart';
-
 import 'package:svf/ReportScreen2.dart';
 import 'package:svf/Utilities/AppBar.dart';
-
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/LineCard.dart';
 import 'package:svf/Utilities/drawer.dart';
@@ -30,7 +29,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     loadLineNames();
-
     loadLineDetails();
   }
 
@@ -52,10 +50,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void handleLineSelected(String lineName) {
     ref.read(currentLineNameProvider.notifier).state = lineName;
-
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => LineDetailScreen()),
+    );
+  }
+
+  void _showUpdateFinanceNameDialog(BuildContext context) {
+    final TextEditingController _financeNameController =
+        TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Update Finance Name'),
+          content: TextField(
+            controller: _financeNameController,
+            decoration: InputDecoration(hintText: 'Enter new finance name'),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Update'),
+              onPressed: () async {
+                final newFinanceName = _financeNameController.text;
+                if (newFinanceName.isNotEmpty) {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.setString('financeName', newFinanceName);
+                  ref.read(financeProvider.notifier).state = newFinanceName;
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -67,6 +103,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: CustomAppBar(
         title: '$financeName',
         actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              _showUpdateFinanceNameDialog(context);
+            },
+          ),
           IconButton(
             icon: Icon(Icons.upload_file),
             onPressed: () {
@@ -159,10 +201,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: ListView.builder(
               itemCount: lineNames.length,
               itemBuilder: (context, index) {
-                return LineCard(
-                  lineName: lineNames[index],
-                  screenWidth: MediaQuery.of(context).size.width,
-                  onLineSelected: () => handleLineSelected(lineNames[index]),
+                return ListTile(
+                  title: LineCard(
+                    lineName: lineNames[index],
+                    screenWidth: MediaQuery.of(context).size.width,
+                    onLineSelected: () => handleLineSelected(lineNames[index]),
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (String value) async {
+                      if (value == 'Update') {
+                        final line = lineNames[index];
+                        final lineDetails = await dbline
+                            .getLineDetails(line); // Fetch line details
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LineScreen(
+                              entry: lineDetails,
+                            ),
+                          ),
+                        );
+                      } else if (value == 'Delete') {
+                        final lineName = lineNames[index];
+                        // Collect all LenId for the corresponding line name
+                        final lenIds =
+                            await dbLending.getLenIdsByLineName(lineName);
+
+                        // Delete entries from Line table
+                        await dbline.deleteLine(lineName);
+
+                        // Delete entries from Lending table
+                        await dbLending.deleteLendingByLineName(lineName);
+
+                        // Delete entries from Collection table for the collected LenId
+                        for (final lenId in lenIds) {
+                          await CollectionDB.deleteEntriesByLenId(lenId);
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Line and related entries deleted successfully')),
+                        );
+
+                        // Optionally, refresh the list or navigate back
+                        loadLineNames();
+                        loadLineDetails();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return {'Update', 'Delete'}.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
+                  ),
                 );
               },
             ),

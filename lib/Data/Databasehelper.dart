@@ -137,6 +137,44 @@ class DatabaseHelper {
 //LINE OPERATIONS
 
 class dbline {
+  static Future<void> deleteLine(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    await db.delete(
+      'Line',
+      where: 'Linename = ?',
+      whereArgs: [lineName],
+    );
+  }
+
+  static Future<void> updateLineNameInLending({
+    required String oldLineName,
+    required String newLineName,
+  }) async {
+    final db = await DatabaseHelper.getDatabase();
+
+    await db.update(
+      'Lending',
+      {'LineName': newLineName},
+      where: 'LineName = ?',
+      whereArgs: [oldLineName],
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getLineDetails(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Line',
+      where: 'Linename = ?',
+      whereArgs: [lineName],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      return null;
+    }
+  }
+
   static Future<double> fetchAmtRecieved(String lineName) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
@@ -253,6 +291,27 @@ class dbline {
 }
 
 class dbLending {
+  static Future<List<int>> getLenIdsByLineName(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      columns: ['LenId'],
+      where: 'LineName = ?',
+      whereArgs: [lineName],
+    );
+
+    return result.map((row) => row['LenId'] as int).toList();
+  }
+
+  static Future<void> deleteLendingByLineName(String lineName) async {
+    final db = await DatabaseHelper.getDatabase();
+    await db.delete(
+      'Lending',
+      where: 'LineName = ?',
+      whereArgs: [lineName],
+    );
+  }
+
   static Future<void> deleteLendingAndCollections(
       int lenId, String linename) async {
     final db = await DatabaseHelper.getDatabase();
@@ -568,6 +627,15 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<void> deleteEntriesByLenId(int lenId) async {
+    final db = await DatabaseHelper.getDatabase();
+    await db.delete(
+      'Collection',
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+  }
+
   static Future<void> deleteEntry(int cid) async {
     final db = await DatabaseHelper.getDatabase();
     await db.delete(

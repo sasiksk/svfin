@@ -22,7 +22,7 @@ class _LineScreenState extends State<LineScreen> {
   void initState() {
     super.initState();
     if (widget.entry != null) {
-      _lineNameController.text = widget.entry!['Line_Name'];
+      _lineNameController.text = widget.entry!['Linename'];
     }
   }
 
@@ -40,12 +40,32 @@ class _LineScreenState extends State<LineScreen> {
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       try {
-        await dbline.insertLine(
-          _lineNameController.text,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Line entry added successfully')),
-        );
+        if (widget.entry != null) {
+          // Update existing entry in Line table
+          await dbline.updateLine(
+            lineName: widget.entry!['Linename'],
+            updatedValues: {
+              'Linename': _lineNameController.text,
+            },
+          );
+          await dbline.updateLineNameInLending(
+            oldLineName: widget.entry!['Linename'],
+            newLineName: _lineNameController.text,
+          );
+          // Update LineName in Lending table
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Line entry updated successfully')),
+          );
+        } else {
+          // Insert new entry
+          await dbline.insertLine(
+            _lineNameController.text,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Line entry added successfully')),
+          );
+        }
         _resetForm();
         Navigator.pushReplacement(
           context,
@@ -93,7 +113,7 @@ class _LineScreenState extends State<LineScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _submitForm,
-                      child: Text('Submit'),
+                      child: Text(widget.entry != null ? 'Update' : 'Submit'),
                     ),
                   ),
                   SizedBox(width: 16.0),
