@@ -160,7 +160,7 @@ class dbline {
     );
   }
 
-  static Future<Map<String, dynamic>?> getLineDetails(String lineName) async {
+  static Future<Map<String, dynamic>> getLineDetails(String lineName) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
       'Line',
@@ -171,7 +171,7 @@ class dbline {
     if (result.isNotEmpty) {
       return result.first;
     } else {
-      return null;
+      throw Exception('No data found for LineName: $lineName');
     }
   }
 

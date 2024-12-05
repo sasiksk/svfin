@@ -17,8 +17,8 @@ class LineCard extends StatelessWidget {
     return GestureDetector(
       onTap: onLineSelected, // Correctly invoke the callback
       child: Container(
-        margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-        width: screenWidth - 40, // Full width minus padding (20 on each side)
+        width: screenWidth,
+        // Full width minus padding (20 on each side)
         child: Card(
           elevation: 10.0,
           shape: RoundedRectangleBorder(
@@ -44,8 +44,8 @@ class LineCard extends StatelessWidget {
                 lineName,
                 textAlign: TextAlign.justify,
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
                   fontFamily: GoogleFonts.tinos().fontFamily, // Set font family
                   color: Colors.white, // White text color
                 ),

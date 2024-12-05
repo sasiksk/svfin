@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineScreen.dart';
@@ -21,9 +22,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   List<String> lineNames = [];
+  List<String> originalLineNames = [];
   double totalAmtGiven = 0.0;
   double totalProfit = 0.0;
   double totalAmtRecieved = 0.0;
+  Map<String, Map<String, dynamic>> lineDetailsMap = {};
 
   @override
   void initState() {
@@ -34,8 +37,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> loadLineNames() async {
     final names = await dbline.getLineNames();
+    final details =
+        await Future.wait(names.map((name) => dbline.getLineDetails(name)));
     setState(() {
+      originalLineNames = names;
       lineNames = names;
+      for (int i = 0; i < names.length; i++) {
+        lineDetailsMap[names[i]] = details[i];
+      }
     });
   }
 
@@ -201,6 +210,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Container(
               height: 50, // Adjust the height as needed
               child: TextField(
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: GoogleFonts.tinos().fontFamily,
+                ),
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.search),
                   suffixIcon: IconButton(
@@ -221,71 +234,145 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fillColor: Colors.white,
                 ),
                 onChanged: (value) {
-                  // Handle search logic here
+                  setState(() {
+                    lineNames = originalLineNames
+                        .where((lineName) => lineName
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                        .toList();
+                  });
                 },
               ),
             ),
           ),
+          // i need a container to dispaly as Linename and in right side i need to display the amount
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Line Name',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.tinos().fontFamily,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Amount in Line                               ',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.tinos().fontFamily,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           Expanded(
             child: ListView.builder(
               itemCount: lineNames.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: LineCard(
-                    lineName: lineNames[index],
-                    screenWidth: MediaQuery.of(context).size.width,
-                    onLineSelected: () => handleLineSelected(lineNames[index]),
-                  ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (String value) async {
-                      if (value == 'Update') {
-                        final line = lineNames[index];
-                        final lineDetails = await dbline
-                            .getLineDetails(line); // Fetch line details
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LineScreen(
-                              entry: lineDetails,
+                final lineName = lineNames[index];
+                final lineDetails = lineDetailsMap[lineName] ?? {};
+                final amtGiven = lineDetails['Amtgiven'] ?? 0.0;
+                final profit = lineDetails['Profit'] ?? 0.0;
+                final expense = lineDetails['expense'] ?? 0.0;
+                final amtRecieved = lineDetails['Amtrecieved'] ?? 0.0;
+                final calculatedValue =
+                    amtGiven + profit - expense - amtRecieved;
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blueAccent, Colors.lightBlueAccent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        lineName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontFamily: GoogleFonts.tinos().fontFamily,
+                        ),
+                      ),
+                      onTap: () => handleLineSelected(lineName),
+                      trailing: SizedBox(
+                        width: 150, // Adjust the width as needed
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '₹${calculatedValue.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontFamily: GoogleFonts.tinos().fontFamily,
+                              ),
                             ),
-                          ),
-                        );
-                      } else if (value == 'Delete') {
-                        final lineName = lineNames[index];
-                        // Collect all LenId for the corresponding line name
-                        final lenIds =
-                            await dbLending.getLenIdsByLineName(lineName);
-
-                        // Delete entries from Line table
-                        await dbline.deleteLine(lineName);
-
-                        // Delete entries from Lending table
-                        await dbLending.deleteLendingByLineName(lineName);
-
-                        // Delete entries from Collection table for the collected LenId
-                        for (final lenId in lenIds) {
-                          await CollectionDB.deleteEntriesByLenId(lenId);
-                        }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Line and related entries deleted successfully')),
-                        );
-
-                        // Optionally, refresh the list or navigate back
-                        loadLineNames();
-                        loadLineDetails();
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return {'Update', 'Delete'}.map((String choice) {
-                        return PopupMenuItem<String>(
-                          value: choice,
-                          child: Text(choice),
-                        );
-                      }).toList();
-                    },
+                            PopupMenuButton<String>(
+                              onSelected: (String value) async {
+                                if (value == 'Update') {
+                                  final lineDetails = lineDetailsMap[lineName];
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          LineScreen(entry: lineDetails),
+                                    ),
+                                  );
+                                } else if (value == 'Delete') {
+                                  final lenIds = await dbLending
+                                      .getLenIdsByLineName(lineName);
+                                  await dbline.deleteLine(lineName);
+                                  await dbLending
+                                      .deleteLendingByLineName(lineName);
+                                  for (final lenId in lenIds) {
+                                    await CollectionDB.deleteEntriesByLenId(
+                                        lenId);
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Line and related entries deleted successfully')),
+                                  );
+                                  loadLineNames();
+                                  loadLineDetails();
+                                }
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return {'Update', 'Delete'}
+                                    .map((String choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice,
+                                    child: Text(choice),
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 );
               },
