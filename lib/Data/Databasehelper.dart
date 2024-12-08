@@ -458,13 +458,14 @@ class dbLending {
   static Future<Map<String, double>> getLineSums(String lineName) async {
     final db = await DatabaseHelper.getDatabase();
     final result = await db.rawQuery('''
-      SELECT 
-        SUM(Amtgiven) as totalAmtGiven, 
-        SUM(Profit) as totalProfit, 
-        SUM(Amtcollected) as totalAmtCollected 
-      FROM Lending
-      WHERE LineName = ?
-    ''', [lineName]);
+    SELECT 
+      SUM(Amtgiven) as totalAmtGiven, 
+      SUM(Profit) as totalProfit, 
+      SUM(Amtrecieved) as totalAmtCollected,
+      SUM(expense) as totalexpense
+    FROM Line
+    WHERE Linename = ?
+  ''', [lineName]);
 
     if (result.isNotEmpty) {
       return {
@@ -472,12 +473,14 @@ class dbLending {
         'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
         'totalAmtCollected':
             result.first['totalAmtCollected'] as double? ?? 0.0,
+        'totalexpense': result.first['totalexpense'] as double? ?? 0.0,
       };
     } else {
       return {
         'totalAmtGiven': 0.0,
         'totalProfit': 0.0,
         'totalAmtCollected': 0.0,
+        'totalexpense': 0.0,
       };
     }
   }
@@ -627,6 +630,28 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<Map<String, double>> getTodaysCollectionAndGiven() async {
+    final db = await DatabaseHelper.getDatabase();
+    final today = DateTime.now();
+    final todayString = DateFormat('dd-MM-yyyy').format(today);
+
+    final result = await db.rawQuery('''
+    SELECT 
+      SUM(CASE WHEN DrAmt IS NOT NULL THEN DrAmt ELSE 0 END) AS totalDrAmt,
+      SUM(CASE WHEN CrAmt IS NOT NULL THEN CrAmt ELSE 0 END) AS totalCrAmt
+    FROM Collection
+    WHERE Date = ?
+  ''', [todayString]);
+
+    final totalDrAmt = (result[0]['totalDrAmt'] ?? 0.0) as double;
+    final totalCrAmt = (result[0]['totalCrAmt'] ?? 0.0) as double;
+
+    return {
+      'totalDrAmt': totalDrAmt,
+      'totalCrAmt': totalCrAmt,
+    };
+  }
+
   static Future<void> deleteEntriesByLenId(int lenId) async {
     final db = await DatabaseHelper.getDatabase();
     await db.delete(

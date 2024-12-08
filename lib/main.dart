@@ -76,7 +76,9 @@ class MyApp extends StatelessWidget {
             borderSide:
                 BorderSide(color: Colors.blue, width: 2), // Purple color
           ),
-          labelStyle: TextStyle(color: Colors.blue), // Purple color
+          labelStyle: TextStyle(
+              color: Colors.blue,
+              fontFamily: GoogleFonts.tinos().fontFamily), // Purple color
         ),
         cardTheme: CardTheme(
           shape: RoundedRectangleBorder(
@@ -84,6 +86,8 @@ class MyApp extends StatelessWidget {
           ),
           elevation: 10.0,
         ),
+
+        fontFamily: GoogleFonts.tinos().fontFamily,
       ),
       home: isFirstLaunch ? const SplashScreen() : const HomeScreen(),
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineReportScreen.dart';
 import 'package:svf/PartyDetailScreen.dart';
-
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
@@ -12,31 +12,57 @@ import 'package:svf/Utilities/PartyScreen.dart';
 import 'package:svf/Utilities/drawer.dart';
 import 'finance_provider.dart';
 
-class LineDetailScreen extends ConsumerWidget {
+class LineDetailScreen extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _LineDetailScreenState createState() => _LineDetailScreenState();
+}
+
+class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
+  List<String> partyNames = [];
+  ValueNotifier<List<String>> filteredPartyNamesNotifier = ValueNotifier([]);
+
+  @override
+  void initState() {
+    super.initState();
+    loadPartyNames();
+  }
+
+  void loadPartyNames() async {
+    final lineName = ref.read(currentLineNameProvider);
+    if (lineName != null) {
+      final names = await dbLending.getPartyNames(lineName);
+      setState(() {
+        partyNames = names;
+        filteredPartyNamesNotifier.value = names;
+      });
+    }
+  }
+
+  void handleLineSelected(String partyName) async {
+    final lineName = ref.read(currentLineNameProvider);
+    ref.read(currentPartyNameProvider.notifier).state = partyName;
+    ref.read(currentLineNameProvider.notifier).state = lineName;
+    // Fetch LenId for the selected party
+    final lenId = await DatabaseHelper.getLenId(lineName!, partyName);
+    ref.read(lenIdProvider.notifier).state = lenId;
+    print(lenId.toString());
+    final stat = await DatabaseHelper.getStatus(lenId!);
+    ref.read(lenStatusProvider.notifier).state = stat.toString();
+    ref.read(lenIdProvider.notifier).state = lenId;
+    print(stat.toString());
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => PartyDetailScreen()),
+    ).then((_) {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final lineName = ref.watch(currentLineNameProvider);
 
     if (lineName == null) {
       return Center(child: CircularProgressIndicator());
-    }
-
-    void handleLineSelected(String partyName) async {
-      ref.read(currentPartyNameProvider.notifier).state = partyName;
-      ref.read(currentLineNameProvider.notifier).state = lineName;
-      // Fetch LenId for the selected party
-      final lenId = await DatabaseHelper.getLenId(lineName!, partyName);
-      ref.read(lenIdProvider.notifier).state = lenId;
-      print(lenId.toString());
-      final stat = await DatabaseHelper.getStatus(lenId!);
-      ref.read(lenStatusProvider.notifier).state = stat.toString();
-      ref.read(lenIdProvider.notifier).state = lenId;
-      print(stat.toString());
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-      ).then((_) {});
     }
 
     return Scaffold(
@@ -57,8 +83,9 @@ class LineDetailScreen extends ConsumerWidget {
                 return Center(child: Text('No data found.'));
               } else {
                 final data = snapshot.data!;
+                print(data);
                 return EmptyCard(
-                  screenHeight: MediaQuery.of(context).size.height * 1.56,
+                  screenHeight: MediaQuery.of(context).size.height * 1.25,
                   screenWidth: MediaQuery.of(context).size.width,
                   title: 'Line Details',
                   content: Column(
@@ -68,11 +95,11 @@ class LineDetailScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Given: ₹${data['Amtgiven']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Given: ₹${data['totalAmtGiven']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(
-                            'Profit: ₹${data['Profit']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Profit: ₹${data['totalProfit']?.toStringAsFixed(2) ?? '0.00'}',
                             style: TextStyle(fontSize: 16),
                           ),
                         ],
@@ -82,7 +109,21 @@ class LineDetailScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Collected: ₹${data['Amtrecieved']?.toStringAsFixed(2) ?? '0.00'}',
+                            'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            'Expense: ₹${data['totalexpense']?.toStringAsFixed(2) ?? '0.00'}',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Amt in Line: ₹${(data['totalAmtGiven']! + data['totalProfit']! - data['totalAmtCollected']! - data['totalexpense']!).toStringAsFixed(2)}',
                             style: TextStyle(fontSize: 16),
                           ),
                         ],
@@ -93,79 +134,143 @@ class LineDetailScreen extends ConsumerWidget {
               }
             },
           ),
-          Text(
-            'Party List  ',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              color: Colors
-                  .black, // Use Colors.black or Colors.grey[800] for contrast
+          SizedBox(
+            height: 5,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              height: 50, // Adjust the height as needed
+              child: TextField(
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: GoogleFonts.tinos().fontFamily,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Search Party',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: (value) {
+                  filteredPartyNamesNotifier.value = partyNames
+                      .where((partyName) =>
+                          partyName.toLowerCase().contains(value.toLowerCase()))
+                      .toList();
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Party Name',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.tinos().fontFamily,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Amount                              ',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.tinos().fontFamily,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<String>>(
-              future: dbLending.getPartyNames(lineName),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No parties found.'));
-                } else {
-                  final partyNames = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: partyNames.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: LineCard(
-                          lineName: partyNames[index],
-                          screenWidth: MediaQuery.of(context).size.width,
-                          onLineSelected: () =>
-                              handleLineSelected(partyNames[index]),
+            child: ValueListenableBuilder<List<String>>(
+              valueListenable: filteredPartyNamesNotifier,
+              builder: (context, filteredPartyNames, _) {
+                return ListView.builder(
+                  itemCount: filteredPartyNames.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 4),
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 231, 235, 223),
+                              Color.fromARGB(255, 75, 105, 3),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (String value) async {
-                            if (value == 'Update') {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PartyScreen(
-                                    partyName: partyNames[index],
-                                    // Pass other necessary details if needed
+                        child: ListTile(
+                          title: Text(
+                            filteredPartyNames[index],
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontFamily: GoogleFonts.tinos().fontFamily,
+                            ),
+                          ),
+                          onTap: () =>
+                              handleLineSelected(filteredPartyNames[index]),
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (String value) async {
+                              if (value == 'Update') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PartyScreen(
+                                      partyName: filteredPartyNames[index],
+                                      // Pass other necessary details if needed
+                                    ),
                                   ),
-                                ),
-                              );
-                            } else if (value == 'Delete') {
-                              final lenId = ref.read(lenIdProvider);
-                              final linename =
-                                  ref.read(currentLineNameProvider);
-                              if (lenId != null) {
-                                await dbLending.deleteLendingAndCollections(
-                                    lenId, linename!);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Party and related collections deleted successfully')),
                                 );
-                                // Optionally, refresh the list or navigate back
+                              } else if (value == 'Delete') {
+                                final lenId = ref.read(lenIdProvider);
+                                final linename =
+                                    ref.read(currentLineNameProvider);
+                                if (lenId != null) {
+                                  await dbLending.deleteLendingAndCollections(
+                                      lenId, linename!);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Party and related collections deleted successfully')),
+                                  );
+                                  // Optionally, refresh the list or navigate back
+                                }
                               }
-                            }
-                          },
-                          itemBuilder: (BuildContext context) {
-                            return {'Update', 'Delete'}.map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(choice),
-                              );
-                            }).toList();
-                          },
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return {'Update', 'Delete'}.map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(choice),
+                                );
+                              }).toList();
+                            },
+                          ),
                         ),
-                      );
-                    },
-                  );
-                }
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),

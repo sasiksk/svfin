@@ -27,12 +27,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   double totalProfit = 0.0;
   double totalAmtRecieved = 0.0;
   Map<String, Map<String, dynamic>> lineDetailsMap = {};
+  double todaysTotalDrAmt = 0.0;
+  double todaysTotalCrAmt = 0.0;
 
   @override
   void initState() {
     super.initState();
     loadLineNames();
     loadLineDetails();
+    loadTodaysCollectionAndGiven();
+  }
+
+  Future<void> loadTodaysCollectionAndGiven() async {
+    final result = await CollectionDB.getTodaysCollectionAndGiven();
+    setState(() {
+      todaysTotalDrAmt = result['totalDrAmt'] ?? 0.0;
+      todaysTotalCrAmt = result['totalCrAmt'] ?? 0.0;
+    });
   }
 
   Future<void> loadLineNames() async {
@@ -202,6 +213,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Today\'s',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: GoogleFonts.tinos().fontFamily,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: LineCard(
+              lineName:
+                  'Collection: ₹${todaysTotalDrAmt.toStringAsFixed(2)}     - Given: ₹${todaysTotalCrAmt.toStringAsFixed(2)}',
+              screenWidth: MediaQuery.of(context).size.width,
+            ),
+          ),
+
           const SizedBox(
             height: 3,
           ),
@@ -297,7 +335,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     height: 50,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.blueAccent, Colors.lightBlueAccent],
+                        colors: [
+                          Color.fromARGB(255, 75, 105, 3),
+                          Color.fromARGB(255, 75, 105, 3),
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
