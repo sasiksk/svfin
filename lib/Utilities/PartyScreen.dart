@@ -43,22 +43,30 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
     }
   }
 
+  Future<int> _getNextCid() async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result =
+        await db.rawQuery('SELECT MAX(LenId) as maxLenId FROM Lending');
+    final maxCid = result.first['maxLenId'] as int?;
+    return (maxCid ?? 0) + 1;
+  }
+
   Future<void> _loadPartyDetails() async {
     final linename = ref.read(currentLineNameProvider);
-    final partyName = ref.read(currentPartyNameProvider);
-    final lenId = ref.read(lenIdProvider);
+    final partyName = widget.partyName;
+    print(partyName);
+    print('.......');
 
-    if (lenId != null) {
-      final partyDetails = await dbLending.getPartyDetails(lenId);
-      if (partyDetails != null) {
-        setState(() {
-          _partyidController.text = partyDetails['LenId'].toString();
-          _partyNameController.text = partyDetails['PartyName'];
-          _partyPhoneNumberController.text = partyDetails['PartyPhnone'];
-          _addressController.text = partyDetails['PartyAdd'];
-          _sms = partyDetails['sms'] == 1;
-        });
-      }
+    final partyDetails =
+        await dbLending.getPartyDetforUpdate(linename!, partyName!);
+    if (partyDetails != null) {
+      setState(() {
+        _partyidController.text = partyDetails['LenId'].toString();
+        _partyNameController.text = partyDetails['PartyName'];
+        _partyPhoneNumberController.text = partyDetails['PartyPhnone'];
+        _addressController.text = partyDetails['PartyAdd'];
+        _sms = partyDetails['sms'] == 1;
+      });
     }
   }
 
@@ -110,7 +118,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
         } else {
           // Insert new entry
           await dbLending.insertParty(
-            lenId: lenId,
+            lenId: await _getNextCid(),
             lineName: _lineName,
             partyName: _partyNameController.text,
             partyPhoneNumber: _partyPhoneNumberController.text,
@@ -159,17 +167,30 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                   style: TextStyle(fontSize: 16.0),
                 ),
                 SizedBox(height: 16.0),
-                CustomTextField(
-                  controller: _partyidController,
-                  labelText: 'Party id',
-                  hintText: 'Enter a unique Party id',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Party Id';
-                    }
-                    return null;
-                  },
-                ),
+                if (widget.partyName != null)
+                  CustomTextField(
+                    controller: _partyidController,
+                    labelText: 'Party id',
+                    hintText: 'Enter a unique Party id',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Party Id';
+                      }
+                      return null;
+                    },
+                  ),
+                if (widget.partyName == null)
+                  CustomTextField(
+                    controller: _partyidController,
+                    labelText: 'Party id',
+                    hintText: 'Enter a unique Party id',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter Party Id';
+                      }
+                      return null;
+                    },
+                  ),
                 SizedBox(
                   height: 10,
                 ),
@@ -189,9 +210,14 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                   controller: _partyPhoneNumberController,
                   labelText: 'Party Phone Number',
                   hintText: 'Enter Party Phone Number',
+                  keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter Party Phone Number';
+                    } else if (value.length != 10) {
+                      return 'Party Phone Number must be 10 digits';
+                    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return 'Please enter a valid Party Phone Number';
                     }
                     return null;
                   },

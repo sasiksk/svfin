@@ -20,6 +20,7 @@ class LineDetailScreen extends ConsumerStatefulWidget {
 class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
   List<String> partyNames = [];
   ValueNotifier<List<String>> filteredPartyNamesNotifier = ValueNotifier([]);
+  Map<String, Map<String, double>> partyDetailsMap = {};
 
   @override
   void initState() {
@@ -31,9 +32,15 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
     final lineName = ref.read(currentLineNameProvider);
     if (lineName != null) {
       final names = await dbLending.getPartyNames(lineName);
+      final details = await Future.wait(
+          names.map((name) => dbLending.getPartyDetailss(lineName, name)));
+      print(details);
       setState(() {
         partyNames = names;
         filteredPartyNamesNotifier.value = names;
+        for (int i = 0; i < names.length; i++) {
+          partyDetailsMap[names[i]] = details[i];
+        }
       });
     }
   }
@@ -201,6 +208,13 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                 return ListView.builder(
                   itemCount: filteredPartyNames.length,
                   itemBuilder: (context, index) {
+                    final partyName = filteredPartyNames[index];
+                    final details = partyDetailsMap[partyName] ?? {};
+                    final amtGiven = details['amtgiven'] ?? 0.0;
+                    final profit = details['profit'] ?? 0.0;
+                    final amtCollected = details['amtcollected'] ?? 0.0;
+                    final calculatedValue = amtGiven + profit - amtCollected;
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 4),
@@ -209,8 +223,8 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Color.fromARGB(255, 231, 235, 223),
-                              Color.fromARGB(255, 75, 105, 3),
+                              Colors.blue,
+                              Colors.blue[200]!,
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -218,42 +232,56 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: ListTile(
-                          title: Text(
-                            filteredPartyNames[index],
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                              fontFamily: GoogleFonts.tinos().fontFamily,
-                            ),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                partyName,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                  fontFamily: GoogleFonts.tinos().fontFamily,
+                                ),
+                              ),
+                              Text(
+                                '₹${calculatedValue.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                  fontFamily: GoogleFonts.tinos().fontFamily,
+                                ),
+                              ),
+                            ],
                           ),
-                          onTap: () =>
-                              handleLineSelected(filteredPartyNames[index]),
+                          onTap: () => handleLineSelected(partyName),
                           trailing: PopupMenuButton<String>(
                             onSelected: (String value) async {
                               if (value == 'Update') {
+                                print(partyName);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PartyScreen(
-                                      partyName: filteredPartyNames[index],
+                                      partyName: partyName,
                                       // Pass other necessary details if needed
                                     ),
                                   ),
                                 );
                               } else if (value == 'Delete') {
-                                final lenId = ref.read(lenIdProvider);
-                                final linename =
-                                    ref.read(currentLineNameProvider);
+                                final lenId = await DatabaseHelper.getLenId(
+                                    lineName!, partyName);
                                 if (lenId != null) {
                                   await dbLending.deleteLendingAndCollections(
-                                      lenId, linename!);
+                                      lenId, lineName);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
                                             'Party and related collections deleted successfully')),
                                   );
                                   // Optionally, refresh the list or navigate back
+                                  loadPartyNames(); // Refresh the list after deletion
                                 }
                               }
                             },

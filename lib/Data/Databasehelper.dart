@@ -291,6 +291,66 @@ class dbline {
 }
 
 class dbLending {
+  static Future<Map<String, double>> getPartyDetailss(
+      String lineName, String partyName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final result = await db.rawQuery('''
+    SELECT 
+      amtgiven, 
+      profit, 
+      amtcollected
+    FROM Lending
+    WHERE LineName = ? AND PartyName = ?
+  ''', [lineName, partyName]);
+
+    if (result.isNotEmpty) {
+      return {
+        'amtgiven': result.first['amtgiven'] as double? ?? 0.0,
+        'profit': result.first['profit'] as double? ?? 0.0,
+        'amtcollected': result.first['amtcollected'] as double? ?? 0.0,
+      };
+    } else {
+      return {
+        'amtgiven': 0.0,
+        'profit': 0.0,
+        'amtcollected': 0.0,
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getPartyDetforUpdate(
+      String lineName, String partyName) async {
+    final db = await DatabaseHelper.getDatabase();
+    final result = await db.rawQuery('''
+    SELECT 
+      LenId, 
+      PartyName,
+      PartyPhnone,
+      PartyAdd,
+      sms
+    FROM Lending
+    WHERE LineName = ? AND PartyName = ?
+  ''', [lineName, partyName]);
+
+    if (result.isNotEmpty) {
+      return {
+        'LenId': result.first['LenId'] as int? ?? 0,
+        'PartyName': result.first['PartyName'] as String? ?? '',
+        'PartyPhnone': result.first['PartyPhnone'] as String? ?? '',
+        'PartyAdd': result.first['PartyAdd'] as String? ?? '',
+        'sms': result.first['sms'] as int? ?? 0,
+      };
+    } else {
+      return {
+        'LenId': 0,
+        'PartyName': '',
+        'PartyPhnone': '',
+        'PartyAdd': '',
+        'sms': 0,
+      };
+    }
+  }
+
   static Future<List<int>> getLenIdsByLineName(String lineName) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
