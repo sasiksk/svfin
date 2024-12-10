@@ -549,9 +549,12 @@ class dbLending {
     final db = await DatabaseHelper.getDatabase();
     final result = await db.rawQuery('''
       SELECT 
-        SUM(Amtgiven) as totalAmtGiven, 
-        SUM(Profit) as totalProfit, 
-        SUM(Amtcollected) as totalAmtCollected
+        SUM(amtgiven) as totalAmtGiven, 
+        SUM(profit) as totalProfit, 
+        SUM(amtcollected) as totalAmtCollected,
+        Lentdate as lentdate,
+        duedays as duedays,
+        status as status
       
       FROM Lending
       WHERE LenId = ?
@@ -563,12 +566,18 @@ class dbLending {
         'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
         'totalAmtCollected':
             result.first['totalAmtCollected'] as double? ?? 0.0,
+        'lentdate': result.first['lentdate'] as String? ?? '',
+        'duedays': result.first['duedays'] as int? ?? 0,
+        'status': result.first['status'] as String? ?? 'passive',
       };
     } else {
       return {
         'totalAmtGiven': 0.0,
         'totalProfit': 0.0,
         'totalAmtCollected': 0.0,
+        'lentdate': 'N/A',
+        'duedays': 0,
+        'status': 'passive',
       };
     }
   }

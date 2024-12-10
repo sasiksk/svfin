@@ -11,6 +11,7 @@ import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 import 'package:svf/home_screen.dart';
 import 'package:svf/linedetailScreen.dart';
 import 'finance_provider.dart';
+import 'package:intl/intl.dart';
 
 class PartyDetailScreen extends ConsumerWidget {
   @override
@@ -27,7 +28,7 @@ class PartyDetailScreen extends ConsumerWidget {
         children: [
           Center(
             child: EmptyCard(
-              screenHeight: MediaQuery.of(context).size.height * 1.85,
+              screenHeight: MediaQuery.of(context).size.height * 1.45,
               screenWidth: MediaQuery.of(context).size.width,
               title: 'Party Details',
               content: Consumer(
@@ -44,56 +45,104 @@ class PartyDetailScreen extends ConsumerWidget {
                         return const Center(child: Text('No data found.'));
                       } else {
                         final data = snapshot.data!;
+                        final daysover = data['lentdate'] != null &&
+                                data['lentdate'].isNotEmpty
+                            ? DateTime.now()
+                                .difference(DateFormat('dd-MM-yyyy')
+                                    .parse(data['lentdate']))
+                                .inDays
+                            : null;
+                        print(daysover);
+
+                        final daysrem =
+                            data['duedays'] != null && daysover != null
+                                ? data['duedays'] - daysover
+                                : null;
+                        print(daysrem);
+                        final duedate = data['lentdate'] != null &&
+                                data['lentdate'].isNotEmpty
+                            ? DateFormat('dd-MM-yyyy')
+                                .parse(data['lentdate'])
+                                .add(Duration(days: data['duedays']))
+                                .toString()
+                            : null;
                         return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   'Given: ₹${data['totalAmtGiven']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 14),
                                 ),
+                                SizedBox(width: 16),
                                 Text(
                                   'Profit: ₹${data['totalProfit']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                SizedBox(width: 16),
+                                Text(
+                                  'Total: ₹${((data['totalAmtGiven'] ?? 0.0) + (data['totalProfit'] ?? 0.0)).toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 8),
+                            Divider(
+                              thickness: 2,
+                              color: const Color.fromARGB(255, 245, 244, 244),
+                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 16),
+                                Text(
+                                  'Due: ₹${((data['totalAmtGiven'] ?? 0.0) + (data['totalProfit'] ?? 0.0) - (data['totalAmtCollected'] ?? 0.0)).toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [],
-                            ),
-                            SizedBox(
-                              height: 5,
+                            Divider(
+                              thickness: 2,
+                              color: const Color.fromARGB(255, 247, 244, 244),
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                IconButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                Partyreportscreen()),
-                                      );
-                                    },
-                                    icon: Icon(Icons.report)),
-                                Text('View Report')
+                                Text(
+                                  'Lentdate: ${data['lentdate']?.toString() ?? '0.00'}',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                SizedBox(width: 14),
+                                Text(
+                                  'Days Over: $daysover',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                SizedBox(width: 14),
+                                Text(
+                                  'Remaining: $daysrem',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: daysrem != null && daysrem < 0
+                                        ? Colors.red
+                                        : Colors.white,
+                                  ),
+                                ),
                               ],
                             ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Text(
+                                  'Duedate: ${duedate != null ? DateFormat('dd-MM-yyyy').format(DateTime.parse(duedate)) : 'N/A'}',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            )
                           ],
                         );
                       }
