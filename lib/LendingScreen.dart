@@ -11,6 +11,18 @@ import 'package:svf/finance_provider.dart';
 import 'package:intl/intl.dart';
 
 class LendingCombinedDetailsScreen extends ConsumerWidget {
+  final double preloadedamtgiven;
+  final double preladedprofit;
+  final String preladedlendate;
+  final int preladedduedays;
+
+  LendingCombinedDetailsScreen({
+    this.preloadedamtgiven = 0.0,
+    this.preladedprofit = 0.0,
+    this.preladedlendate = '',
+    this.preladedduedays = 0,
+  });
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _amtGivenController = TextEditingController();
   final TextEditingController _profitController = TextEditingController();
@@ -57,16 +69,33 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
           final double existingAmtGiven = existingEntry['Amtgiven'];
           final double existingProfit = existingEntry['Profit'];
 
-          // Add new values to existing values
-          final double newAmtGiven = existingAmtGiven + amtGiven;
-          final double newProfit = existingProfit + profit;
+          if (preloadedamtgiven > 0) {
+            print('existingAmtGiven: $existingAmtGiven');
+            print('preloadedamtgiven: $preloadedamtgiven');
+            print('amtGiven: $amtGiven');
+            final double newAmtGiven =
+                existingAmtGiven - preloadedamtgiven + amtGiven;
+            print('newAmtGiven: $newAmtGiven');
+            final double newProfit = existingProfit - preladedprofit + profit;
+            print('newProfit: $newProfit');
 
-          // Update the Line table with new values
-          await dbline.updateLineAmounts(
-            lineName: lineName,
-            amtGiven: newAmtGiven,
-            profit: newProfit,
-          );
+            // Update the Line table with new values
+            await dbline.updateLineAmounts(
+              lineName: lineName,
+              amtGiven: newAmtGiven,
+              profit: newProfit,
+            );
+          } else {
+            final double newAmtGiven = existingAmtGiven + amtGiven;
+            final double newProfit = existingProfit + profit;
+
+            // Update the Line table with new values
+            await dbline.updateLineAmounts(
+              lineName: lineName,
+              amtGiven: newAmtGiven,
+              profit: newProfit,
+            );
+          }
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -105,10 +134,22 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    _amtGivenController.text = preloadedamtgiven.toString();
+    _profitController.text = preladedprofit.toString();
+    if (preladedlendate.isNotEmpty) {
+      _lentDateController.text = DateFormat('dd-MM-yyyy')
+          .format(DateFormat('dd-MM-yyyy').parse(preladedlendate));
+    }
+    _dueDaysController.text = preladedduedays.toString();
+
+    // Call the calculation methods to update the total and due date
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateTotal();
+      _calculateDueDate();
+    });
+
     final lineName = ref.watch(currentLineNameProvider);
     final partyName = ref.watch(currentPartyNameProvider);
-
-    // final Int lenId = ref.watch(lenIdProvider as ProviderListenable<Int>);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -218,7 +259,8 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                             .then((lenid) {
                           if (lenid != null) {
                             final lenStatus = ref.read(lenStatusProvider);
-                            if (lenStatus == 'passive') {
+                            if (lenStatus == 'passive' ||
+                                preloadedamtgiven > 0) {
                               _updateLending(
                                   context, lineName, partyName, lenid);
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -239,7 +281,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                         });
                       }
                     },
-                    child: Text("Submit"),
+                    child: Text(preloadedamtgiven > 0 ? "Update" : "Submit"),
                   ),
                 ),
               ],

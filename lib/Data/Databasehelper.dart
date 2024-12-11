@@ -685,6 +685,13 @@ class dbLending {
     final lentDate = updatedValues['Lentdate'];
     final total = updatedValues['amtgiven'] + updatedValues['profit'];
     print(lenId.toString());
+
+    await db.delete(
+      'Collection',
+      where: 'LenId = ? AND Date = ?',
+      whereArgs: [lenId, lentDate],
+    );
+
     await db.insert(
       'Collection',
       {
@@ -699,6 +706,22 @@ class dbLending {
 }
 
 class CollectionDB {
+  static Future<int> getLenIdForCid(int cid) async {
+    final db = await DatabaseHelper.getDatabase();
+    final result = await db.query(
+      'Collection',
+      columns: ['LenId'], // Replace with your actual column name
+      where: 'cid = ?',
+      whereArgs: [cid],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['LenId'] as int;
+    } else {
+      throw Exception('LenId not found for cid: $cid');
+    }
+  }
+
   static Future<Map<String, double>> getTodaysCollectionAndGiven() async {
     final db = await DatabaseHelper.getDatabase();
     final today = DateTime.now();

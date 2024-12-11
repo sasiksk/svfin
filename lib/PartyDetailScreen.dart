@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/CollectionScreen.dart';
@@ -8,12 +10,43 @@ import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/BottomNavigationBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
-import 'package:svf/home_screen.dart';
+import 'package:svf/LendingScreen.dart';
 import 'package:svf/linedetailScreen.dart';
 import 'finance_provider.dart';
 import 'package:intl/intl.dart';
 
 class PartyDetailScreen extends ConsumerWidget {
+  static Future<void> deleteEntry(BuildContext context, int cid,
+      String linename, double drAmt, int lenId, String partyName) async {
+    await CollectionDB.deleteEntry(cid);
+    final lendingData = await dbLending.fetchLendingData(lenId);
+    final amtRecieved_Line = await dbline.fetchAmtRecieved(linename);
+    final newamtrecived = amtRecieved_Line + -drAmt;
+    await dbline.updateLine(
+      lineName: linename,
+      updatedValues: {'Amtrecieved': newamtrecived},
+    );
+
+    final double currentAmtCollected = lendingData['amtcollected'];
+    final double newAmtCollected = currentAmtCollected - drAmt;
+
+    final updatedValues = {'amtcollected': newAmtCollected};
+    await dbLending.updateAmtCollectedAndGiven(
+      lineName: linename,
+      partyName: partyName,
+      lenId: lenId,
+      updatedValues: updatedValues,
+    );
+
+    Navigator.of(context).pop(); // Close the confirmation dialog
+    Navigator.of(context).pop(); // Close the options dialog
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => PartyDetailScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final linename = ref.watch(currentLineNameProvider);
@@ -207,189 +240,83 @@ class PartyDetailScreen extends ConsumerWidget {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      date,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      crAmt > 0 ? '₹$crAmt' : '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      drAmt > 0 ? '₹ $drAmt' : '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.drag_indicator),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ListTile(
-                                                    title: const Text('Update'),
-                                                    onTap: () {
-                                                      if (drAmt > 0) {
-                                                        Navigator.of(context)
-                                                            .push(
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                CollectionScreen(
-                                                              preloadedDate:
-                                                                  date,
-                                                              preloadedAmtCollected:
-                                                                  drAmt,
-                                                              preloadedCid: cid,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      } else {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      }
-                                                    },
-                                                  ),
-                                                  ListTile(
-                                                    title: Text('Delete'),
-                                                    onTap: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return AlertDialog(
-                                                            title: Text(
-                                                                'Confirm Delete'),
-                                                            content: Text(
-                                                                'Are you sure you want to delete this entry?'),
-                                                            actions: [
-                                                              TextButton(
-                                                                child: Text(
-                                                                    'Cancel'),
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                },
-                                                              ),
-                                                              TextButton(
-                                                                child:
-                                                                    Text('OK'),
-                                                                onPressed:
-                                                                    () async {
-                                                                  await CollectionDB
-                                                                      .deleteEntry(
-                                                                          cid);
-                                                                  final lendingData =
-                                                                      await dbLending
-                                                                          .fetchLendingData(
-                                                                              lenId);
-                                                                  final amtRecieved_Line =
-                                                                      await dbline
-                                                                          .fetchAmtRecieved(
-                                                                              linename!);
-                                                                  final newamtrecived =
-                                                                      amtRecieved_Line +
-                                                                          -drAmt;
-                                                                  await dbline.updateLine(
-                                                                      lineName:
-                                                                          linename,
-                                                                      updatedValues: {
-                                                                        'Amtrecieved':
-                                                                            newamtrecived
-                                                                      });
-
-                                                                  final double
-                                                                      currentAmtCollected =
-                                                                      lendingData[
-                                                                          'amtcollected'];
-
-                                                                  // Calculate the new amtCollected and dueAmt
-                                                                  final double
-                                                                      newAmtCollected =
-                                                                      currentAmtCollected -
-                                                                          drAmt;
-
-                                                                  final updatedValues =
-                                                                      {
-                                                                    'amtcollected':
-                                                                        newAmtCollected,
-                                                                  };
-                                                                  //invoke dblending.updatelending
-                                                                  await dbLending.updateAmtCollectedAndGiven(
-                                                                      lineName:
-                                                                          linename,
-                                                                      partyName:
-                                                                          partyName!,
-                                                                      lenId:
-                                                                          lenId,
-                                                                      updatedValues:
-                                                                          updatedValues);
-
-                                                                  //get the lenid from the provider
-                                                                  //get the current line name from the provider
-
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop(); // Close the confirmation dialog
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop(); // Close the options dialog
-                                                                  // Refresh the screen
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pushReplacement(
-                                                                    MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              PartyDetailScreen(),
-                                                                    ),
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ],
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (drAmt > 0) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => CollectionScreen(
+                                    preloadedDate: date,
+                                    preloadedAmtCollected: drAmt,
+                                    preloadedCid: cid,
+                                  ),
                                 ),
-                              ],
+                              );
+                            }
+                            if (crAmt > 0) {
+                              //get the LenId for the current cid from the collection table
+
+                              final partyDetails =
+                                  await dbLending.getPartyDetails(lenId);
+
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      LendingCombinedDetailsScreen(
+                                    preloadedamtgiven:
+                                        partyDetails?['amtgiven'] ?? 0.0,
+                                    preladedprofit:
+                                        partyDetails?['profit'] ?? 0.0,
+                                    preladedlendate:
+                                        partyDetails?['Lentdate'] ?? '',
+                                    preladedduedays:
+                                        partyDetails?['duedays'] ?? 0,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        date,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        crAmt > 0 ? '₹$crAmt' : '',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        drAmt > 0 ? '₹ $drAmt' : '',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

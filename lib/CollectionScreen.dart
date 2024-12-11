@@ -5,7 +5,6 @@ import 'package:svf/PartyDetailScreen.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/finance_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:svf/linedetailScreen.dart';
 
 class CollectionScreen extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
@@ -104,102 +103,154 @@ class CollectionScreen extends ConsumerWidget {
                 },
               ),
               SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() == true) {
-                      final date = _dateController.text;
-                      final collectedAmt =
-                          double.parse(_amtCollectedController.text);
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState?.validate() == true) {
+                        final date = _dateController.text;
+                        final collectedAmt =
+                            double.parse(_amtCollectedController.text);
 
-                      if (lenid != null && lineName != null) {
-                        if (lenStatus == 'active') {
-                          if (preloadedCid != null) {
-                            // Fetch the current amtCollected and dueAmt from Lending table
-                            final lendingData =
-                                await dbLending.fetchLendingData(lenid);
+                        if (lenid != null && lineName != null) {
+                          if (lenStatus == 'active') {
+                            if (preloadedCid != null) {
+                              // Fetch the current amtCollected and dueAmt from Lending table
+                              final lendingData =
+                                  await dbLending.fetchLendingData(lenid);
 
-                            final double currentAmtCollected =
-                                lendingData['amtcollected'];
-                            final double currentgivenamt =
-                                lendingData['amtgiven'];
+                              final double currentAmtCollected =
+                                  lendingData['amtcollected'];
+                              final double currentgivenamt =
+                                  lendingData['amtgiven'];
 
-                            // Calculate the new amtCollected and dueAmt
-                            final double newAmtCollected = currentAmtCollected +
-                                collectedAmt -
-                                preloadedAmtCollected!;
-                            final String status =
-                                currentgivenamt - newAmtCollected == 0
-                                    ? 'passive'
-                                    : 'active';
+                              // Calculate the new amtCollected and dueAmt
+                              final double newAmtCollected =
+                                  currentAmtCollected +
+                                      collectedAmt -
+                                      preloadedAmtCollected!;
+                              final String status =
+                                  currentgivenamt - newAmtCollected == 0
+                                      ? 'passive'
+                                      : 'active';
 
-                            final amtRecieved_Line =
-                                await dbline.fetchAmtRecieved(lineName);
-                            final newamtrecived = amtRecieved_Line +
-                                collectedAmt -
-                                preloadedAmtCollected!;
-                            await dbline.updateLine(
-                                lineName: lineName,
-                                updatedValues: {'Amtrecieved': newamtrecived});
+                              final amtRecieved_Line =
+                                  await dbline.fetchAmtRecieved(lineName);
+                              final newamtrecived = amtRecieved_Line +
+                                  collectedAmt -
+                                  preloadedAmtCollected!;
+                              await dbline.updateLine(
+                                  lineName: lineName,
+                                  updatedValues: {
+                                    'Amtrecieved': newamtrecived
+                                  });
 
-                            await dbLending.updateLendingAmounts(
+                              await dbLending.updateLendingAmounts(
+                                  lenId: lenid,
+                                  newAmtCollected: newAmtCollected,
+                                  status: status);
+
+                              //newDueAmt: newDueAmt);
+                              // Update existing record in Collection table
+                              await CollectionDB.updateCollection(
+                                cid: preloadedCid!,
                                 lenId: lenid,
-                                newAmtCollected: newAmtCollected,
-                                status: status);
+                                date: date,
+                                crAmt: 0.0,
+                                drAmt: collectedAmt,
+                              );
+                            } else {
+                              // Insert new record
+                              final cid = await _getNextCid();
+                              await CollectionDB.insertCollection(
+                                cid: cid,
+                                lenId: lenid,
+                                date: date,
+                                crAmt: 0.0,
+                                drAmt: collectedAmt,
+                              );
+                              print(lineName);
+                              print(partyName);
+                              print(lenid);
+                              await _updateLendingData(lenid, collectedAmt);
+                              await _updateAmtRecieved(lineName, collectedAmt);
+                            }
 
-                            //newDueAmt: newDueAmt);
-                            // Update existing record in Collection table
-                            await CollectionDB.updateCollection(
-                              cid: preloadedCid!,
-                              lenId: lenid,
-                              date: date,
-                              crAmt: 0.0,
-                              drAmt: collectedAmt,
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Form Submitted')),
+                            );
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PartyDetailScreen(),
+                              ),
                             );
                           } else {
-                            // Insert new record
-                            final cid = await _getNextCid();
-                            await CollectionDB.insertCollection(
-                              cid: cid,
-                              lenId: lenid,
-                              date: date,
-                              crAmt: 0.0,
-                              drAmt: collectedAmt,
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Cannot lend amount to passive state party')),
                             );
-                            print(lineName);
-                            print(partyName);
-                            print(lenid);
-                            await _updateLendingData(lenid, collectedAmt);
-                            await _updateAmtRecieved(lineName, collectedAmt);
                           }
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Form Submitted')),
-                          );
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PartyDetailScreen(),
-                            ),
-                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text(
-                                    'Cannot lend amount to passive state party')),
+                                content:
+                                    Text('Error: LenId or LineName is null')),
                           );
                         }
+                      }
+                    },
+                    child: Text(preloadedCid != null ? "Update" : "Submit"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (preloadedCid != null) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Delete Confirmation"),
+                              content: Text(
+                                  "Are you sure you want to delete this entry?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.of(context).pop();
+                                    await PartyDetailScreen.deleteEntry(
+                                      context,
+                                      preloadedCid!,
+                                      lineName!,
+                                      preloadedAmtCollected!,
+                                      lenid!,
+                                      partyName!,
+                                    );
+                                  },
+                                  child: Text("Delete"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content:
-                                  Text('Error: LenId or LineName is null')),
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PartyDetailScreen(),
+                          ),
                         );
                       }
-                    }
-                  },
-                  child: Text("Submit"),
-                ),
+                    },
+                    child: Text(preloadedCid != null ? "Delete" : "Cancel"),
+                  ),
+                ],
               ),
             ],
           ),
