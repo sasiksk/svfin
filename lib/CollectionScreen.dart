@@ -14,7 +14,10 @@ class CollectionScreen extends ConsumerWidget {
   final double? preloadedAmtCollected;
 
   CollectionScreen(
-      {String? preloadedDate, this.preloadedAmtCollected, this.preloadedCid}) {
+      {super.key,
+      String? preloadedDate,
+      this.preloadedAmtCollected,
+      this.preloadedCid}) {
     if (preloadedDate != null) {
       _dateController.text = preloadedDate;
     } else {
@@ -27,7 +30,6 @@ class CollectionScreen extends ConsumerWidget {
 
   Future<void> _updateLendingData(int lenId, double collectedAmt) async {
     final lendingData = await dbLending.fetchLendingData(lenId);
-    print(lendingData.entries);
 
     final double amtCollected = (lendingData['amtcollected']);
     final double amtgiven = (lendingData['amtgiven']) + (lendingData['profit']);
@@ -66,7 +68,7 @@ class CollectionScreen extends ConsumerWidget {
     final partyName = ref.watch(currentPartyNameProvider);
     final lenid = ref.watch(lenIdProvider);
     final lineName = ref.watch(currentLineNameProvider);
-    final lenStatus = ref.watch(lenStatusProvider);
+    final lenStatus = dbLending.getStatusByLenId(lenid!);
 
     return Scaffold(
       appBar: AppBar(
@@ -86,10 +88,10 @@ class CollectionScreen extends ConsumerWidget {
                 firstDate: DateTime(2000),
                 lastDate: DateTime.now(),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _amtCollectedController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Amount Collected",
                   hintText: "Enter the amount collected",
                   border: OutlineInputBorder(),
@@ -102,7 +104,7 @@ class CollectionScreen extends ConsumerWidget {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -170,15 +172,13 @@ class CollectionScreen extends ConsumerWidget {
                                 crAmt: 0.0,
                                 drAmt: collectedAmt,
                               );
-                              print(lineName);
-                              print(partyName);
-                              print(lenid);
+
                               await _updateLendingData(lenid, collectedAmt);
                               await _updateAmtRecieved(lineName, collectedAmt);
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Form Submitted')),
+                              const SnackBar(content: Text('Form Submitted')),
                             );
                             Navigator.pushReplacement(
                               context,
@@ -188,14 +188,14 @@ class CollectionScreen extends ConsumerWidget {
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
+                              const SnackBar(
                                   content: Text(
                                       'Cannot lend amount to passive state party')),
                             );
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                                 content:
                                     Text('Error: LenId or LineName is null')),
                           );
@@ -211,15 +211,15 @@ class CollectionScreen extends ConsumerWidget {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text("Delete Confirmation"),
-                              content: Text(
+                              title: const Text("Delete Confirmation"),
+                              content: const Text(
                                   "Are you sure you want to delete this entry?"),
                               actions: [
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                  child: Text("Cancel"),
+                                  child: const Text("Cancel"),
                                 ),
                                 TextButton(
                                   onPressed: () async {
@@ -233,7 +233,7 @@ class CollectionScreen extends ConsumerWidget {
                                       partyName!,
                                     );
                                   },
-                                  child: Text("Delete"),
+                                  child: const Text("Delete"),
                                 ),
                               ],
                             );

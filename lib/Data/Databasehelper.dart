@@ -117,7 +117,8 @@ class DatabaseHelper {
     LenId INTEGER NOT NULL,
     Date date NOT NULL,
     CrAmt REAL,
-    DrAmt REAL
+    DrAmt REAL,
+    balance REAL
   )
 ''');
 
@@ -291,6 +292,21 @@ class dbline {
 }
 
 class dbLending {
+  static Future<String?> getStatusByLenId(int lenId) async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Lending',
+      columns: ['status'],
+      where: 'LenId = ?',
+      whereArgs: [lenId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['status'] as String?;
+    }
+    return null;
+  }
+
   static Future<Map<String, double>> getPartyDetailss(
       String lineName, String partyName) async {
     final db = await DatabaseHelper.getDatabase();

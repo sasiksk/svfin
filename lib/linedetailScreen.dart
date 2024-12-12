@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/LineReportScreen.dart';
+
 import 'package:svf/PartyDetailScreen.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
-import 'package:svf/Utilities/LineCard.dart';
+
 import 'package:svf/Utilities/PartyScreen.dart';
 import 'package:svf/Utilities/drawer.dart';
 import 'finance_provider.dart';
@@ -34,7 +34,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
       final names = await dbLending.getPartyNames(lineName);
       final details = await Future.wait(
           names.map((name) => dbLending.getPartyDetailss(lineName, name)));
-      print(details);
+
       setState(() {
         partyNames = names;
         filteredPartyNamesNotifier.value = names;
@@ -48,15 +48,16 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
   void handleLineSelected(String partyName) async {
     final lineName = ref.read(currentLineNameProvider);
     ref.read(currentPartyNameProvider.notifier).state = partyName;
-    ref.read(currentLineNameProvider.notifier).state = lineName;
-    // Fetch LenId for the selected party
+
     final lenId = await DatabaseHelper.getLenId(lineName!, partyName);
     ref.read(lenIdProvider.notifier).state = lenId;
-    print(lenId.toString());
-    final stat = await DatabaseHelper.getStatus(lenId!);
-    ref.read(lenStatusProvider.notifier).state = stat.toString();
+
+    final String? stat = await DatabaseHelper.getStatus(lenId!);
+    if (stat != null) {
+      ref.read(lenStatusProvider.notifier).updateLenStatus(stat);
+    }
+
     ref.read(lenIdProvider.notifier).state = lenId;
-    print(stat.toString());
 
     Navigator.pushReplacement(
       context,
@@ -69,7 +70,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
     final lineName = ref.watch(currentLineNameProvider);
 
     if (lineName == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Scaffold(
@@ -83,14 +84,14 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
             future: dbLending.getLineSums(lineName),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData) {
-                return Center(child: Text('No data found.'));
+                return const Center(child: Text('No data found.'));
               } else {
                 final data = snapshot.data!;
-                print(data);
+
                 return EmptyCard(
                   screenHeight: MediaQuery.of(context).size.height * 1.25,
                   screenWidth: MediaQuery.of(context).size.width,
@@ -103,35 +104,35 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                         children: [
                           Text(
                             'Given: ₹${data['totalAmtGiven']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                           Text(
                             'Profit: ₹${data['totalProfit']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                           Text(
                             'Expense: ₹${data['totalexpense']?.toStringAsFixed(2) ?? '0.00'}',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Amt in Line: ₹${(data['totalAmtGiven']! + data['totalProfit']! - data['totalAmtCollected']! - data['totalexpense']!).toStringAsFixed(2)}',
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ],
                       ),
@@ -141,20 +142,20 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
               }
             },
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(
-              height: 50, // Adjust the height as needed
+              height: 50,
               child: TextField(
                 style: TextStyle(
                   color: Colors.black,
                   fontFamily: GoogleFonts.tinos().fontFamily,
                 ),
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   hintText: 'Search Party',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
@@ -245,7 +246,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                 ),
                               ),
                               Text(
-                                '₹${calculatedValue.toStringAsFixed(2)}',
+                                'Bal: ₹${calculatedValue.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -259,7 +260,6 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                           trailing: PopupMenuButton<String>(
                             onSelected: (String value) async {
                               if (value == 'Update') {
-                                print(partyName);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -276,7 +276,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                   await dbLending.deleteLendingAndCollections(
                                       lenId, lineName);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text(
                                             'Party and related collections deleted successfully')),
                                   );

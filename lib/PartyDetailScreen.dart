@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/CollectionScreen.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LendingScreen.dart';
-import 'package:svf/PartyReportScreen.dart';
+
 import 'package:svf/Utilities/AppBar.dart';
-import 'package:svf/Utilities/BottomNavigationBar.dart';
+
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
-import 'package:svf/LendingScreen.dart';
-import 'package:svf/linedetailScreen.dart';
+
+import 'package:svf/Utilities/TransactionCard.dart';
+
 import 'finance_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -52,6 +53,7 @@ class PartyDetailScreen extends ConsumerWidget {
     final linename = ref.watch(currentLineNameProvider);
     final partyName = ref.watch(currentPartyNameProvider);
     final lenId = ref.watch(lenIdProvider);
+    final status = ref.watch(lenStatusProvider);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -85,13 +87,11 @@ class PartyDetailScreen extends ConsumerWidget {
                                     .parse(data['lentdate']))
                                 .inDays
                             : null;
-                        print(daysover);
-
                         final daysrem =
                             data['duedays'] != null && daysover != null
                                 ? data['duedays'] - daysover
                                 : null;
-                        print(daysrem);
+
                         final duedate = data['lentdate'] != null &&
                                 data['lentdate'].isNotEmpty
                             ? DateFormat('dd-MM-yyyy')
@@ -105,21 +105,21 @@ class PartyDetailScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Given: ₹${data['totalAmtGiven']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                                SizedBox(width: 16),
+                                const SizedBox(width: 16),
                                 Text(
                                   'Profit: ₹${data['totalProfit']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                                SizedBox(width: 16),
+                                const SizedBox(width: 16),
                                 Text(
                                   'Total: ₹${((data['totalAmtGiven'] ?? 0.0) + (data['totalProfit'] ?? 0.0)).toStringAsFixed(2)}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 2,
                               color: const Color.fromARGB(255, 245, 244, 244),
                             ),
@@ -127,20 +127,20 @@ class PartyDetailScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Collected: ₹${data['totalAmtCollected']?.toStringAsFixed(2) ?? '0.00'}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 16),
+                                const SizedBox(width: 16),
                                 Text(
                                   'Due: ₹${((data['totalAmtGiven'] ?? 0.0) + (data['totalProfit'] ?? 0.0) - (data['totalAmtCollected'] ?? 0.0)).toStringAsFixed(2)}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 2,
                               color: const Color.fromARGB(255, 247, 244, 244),
                             ),
@@ -148,14 +148,14 @@ class PartyDetailScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Lentdate: ${data['lentdate']?.toString() ?? '0.00'}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                                SizedBox(width: 14),
+                                const SizedBox(width: 14),
                                 Text(
                                   'Days Over: $daysover',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
-                                SizedBox(width: 14),
+                                const SizedBox(width: 14),
                                 Text(
                                   'Remaining: $daysrem',
                                   style: TextStyle(
@@ -167,12 +167,12 @@ class PartyDetailScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Row(
                               children: [
                                 Text(
                                   'Duedate: ${duedate != null ? DateFormat('dd-MM-yyyy').format(DateTime.parse(duedate)) : 'N/A'}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14),
                                 ),
                               ],
                             )
@@ -185,17 +185,70 @@ class PartyDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
+          // i need a card with single row .which contains 3 icon buttons
+          // 1. party report 2. sms reminder  3. watsup reminder
           Padding(
-            padding: const EdgeInsets.only(right: 25),
+              padding: const EdgeInsets.fromLTRB(15, 2, 25, 15),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 2,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Party Report
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.picture_as_pdf,
+                              color: Colors.blue),
+                          onPressed: () {
+                            // Add your logic here
+                          },
+                        ),
+                        const Text('Report', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    // SMS Reminder
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.sms, color: Colors.blue),
+                          onPressed: () {
+                            // Add your logic here
+                          },
+                        ),
+                        const Text('SMS', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                    // WhatsApp Reminder
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.telegram, color: Colors.blue),
+                          onPressed: () {
+                            // Add your logic here
+                          },
+                        ),
+                        const Text('WhatsApp', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              )),
+
+          const Padding(
+            padding: EdgeInsets.only(right: 25),
             child: Row(
               children: [
                 // Centered "Cr"
                 Expanded(
                   child: Center(
                     child: Text(
-                      'You Gave',
+                      '                                      You Gave',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
@@ -206,7 +259,7 @@ class PartyDetailScreen extends ConsumerWidget {
                 Text(
                   'You Got',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
@@ -219,11 +272,11 @@ class PartyDetailScreen extends ConsumerWidget {
               future: CollectionDB.getCollectionEntries(lenId!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No entries found.'));
+                  return const Center(child: Text('No entries found.'));
                 } else {
                   final entries = snapshot.data!;
                   // Assuming you start with a 0 balance
@@ -276,48 +329,11 @@ class PartyDetailScreen extends ConsumerWidget {
                               );
                             }
                           },
-                          child: Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        date,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        crAmt > 0 ? '₹$crAmt' : '',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        drAmt > 0 ? '₹ $drAmt' : '',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
+                          child: TransactionCard(
+                            dateTime: date,
+                            balance: crAmt,
+                            cramount: crAmt,
+                            dramount: drAmt,
                           ),
                         ),
                       );

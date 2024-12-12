@@ -86,6 +86,7 @@ class LenIdNotifier extends StateNotifier<int?> {
 }
 
 // Provider for LenStatus
+// Provider for LenStatus
 final lenStatusProvider =
     StateNotifierProvider<LenStatusNotifier, String>((ref) {
   return LenStatusNotifier();
@@ -105,6 +106,12 @@ class LenStatusNotifier extends StateNotifier<String> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     state = status;
     await prefs.setString('lenStatus', status);
+  }
+
+  Future<void> updateLenStatus(String newStatus) async {
+    state = newStatus;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lenStatus', newStatus);
   }
 }
 

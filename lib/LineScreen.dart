@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
 import 'package:svf/home_screen.dart';
-import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 
 class LineScreen extends StatefulWidget {
   final Map<String, dynamic>? entry; // Add this line
 
-  LineScreen({this.entry}); // Update the constructor
+  const LineScreen({super.key, this.entry}); // Update the constructor
 
   @override
   _LineScreenState createState() => _LineScreenState();
@@ -55,7 +54,7 @@ class _LineScreenState extends State<LineScreen> {
           // Update LineName in Lending table
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Line entry updated successfully')),
+            const SnackBar(content: Text('Line entry updated successfully')),
           );
         } else {
           // Insert new entry
@@ -63,13 +62,13 @@ class _LineScreenState extends State<LineScreen> {
             _lineNameController.text,
           );
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Line entry added successfully')),
+            const SnackBar(content: Text('Line entry added successfully')),
           );
         }
         _resetForm();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -83,14 +82,14 @@ class _LineScreenState extends State<LineScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Line Screen',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -107,7 +106,7 @@ class _LineScreenState extends State<LineScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 children: [
                   Expanded(
@@ -116,24 +115,24 @@ class _LineScreenState extends State<LineScreen> {
                       child: Text(widget.entry != null ? 'Update' : 'Submit'),
                     ),
                   ),
-                  SizedBox(width: 16.0),
+                  const SizedBox(width: 16.0),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _resetForm,
-                      child: Text('Reset'),
+                      child: const Text('Reset'),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
                   );
                 },
-                child: Text('Back'),
+                child: const Text('Back'),
               ),
             ],
           ),

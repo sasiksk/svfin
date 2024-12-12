@@ -10,7 +10,8 @@ class PartyScreen extends ConsumerStatefulWidget {
   final String? partyPhoneNumber;
   final String? address;
 
-  PartyScreen({
+  const PartyScreen({
+    super.key,
     this.partyName,
     this.partyPhoneNumber,
     this.address,
@@ -54,8 +55,6 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
   Future<void> _loadPartyDetails() async {
     final linename = ref.read(currentLineNameProvider);
     final partyName = widget.partyName;
-    print(partyName);
-    print('.......');
 
     final partyDetails =
         await dbLending.getPartyDetforUpdate(linename!, partyName!);
@@ -113,7 +112,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
             updatedValues: partyDetails,
           );
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Party updated successfully')),
+            const SnackBar(content: Text('Party updated successfully')),
           );
         } else {
           // Insert new entry
@@ -126,7 +125,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
             sms: _sms,
           );
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Party added successfully')),
+            const SnackBar(content: Text('Party added successfully')),
           );
         }
 
@@ -147,26 +146,26 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Party Screen',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 Text(
                   'Line Name: $_lineName',
-                  style: TextStyle(fontSize: 16.0),
+                  style: const TextStyle(fontSize: 16.0),
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 if (widget.partyName != null)
                   CustomTextField(
                     controller: _partyidController,
@@ -191,7 +190,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                       return null;
                     },
                   ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 CustomTextField(
@@ -205,7 +204,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 CustomTextField(
                   controller: _partyPhoneNumberController,
                   labelText: 'Party Phone Number',
@@ -222,7 +221,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 CustomTextField(
                   controller: _addressController,
                   labelText: 'Address',
@@ -234,8 +233,8 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16.0),
-                Text(
+                const SizedBox(height: 16.0),
+                const Text(
                   'SMS Notifications',
                   style: TextStyle(fontSize: 16.0),
                 ),
@@ -243,7 +242,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                   children: [
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: Text('Yes'),
+                        title: const Text('Yes'),
                         value: true,
                         groupValue: _sms,
                         onChanged: (value) {
@@ -255,7 +254,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     ),
                     Expanded(
                       child: RadioListTile<bool>(
-                        title: Text('No'),
+                        title: const Text('No'),
                         value: false,
                         groupValue: _sms,
                         onChanged: (value) {
@@ -267,7 +266,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 Row(
                   children: [
                     Expanded(
@@ -281,21 +280,21 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                             widget.partyName != null ? 'Update' : 'Submit'),
                       ),
                     ),
-                    SizedBox(width: 16.0),
+                    const SizedBox(width: 16.0),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _resetForm,
-                        child: Text('Reset'),
+                        child: const Text('Reset'),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('Back'),
+                  child: const Text('Back'),
                 ),
               ],
             ),

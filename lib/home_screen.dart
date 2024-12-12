@@ -84,20 +84,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Update Finance Name'),
+          title: const Text('Update Finance Name'),
           content: TextField(
             controller: _financeNameController,
-            decoration: InputDecoration(hintText: 'Enter new finance name'),
+            decoration:
+                const InputDecoration(hintText: 'Enter new finance name'),
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Update'),
+              child: const Text('Update'),
               onPressed: () async {
                 final newFinanceName = _financeNameController.text;
                 if (newFinanceName.isNotEmpty) {
@@ -121,25 +122,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: '$financeName',
+        title: financeName,
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
+            icon: const Icon(Icons.edit_note_outlined),
             onPressed: () {
               _showUpdateFinanceNameDialog(context);
             },
           ),
           IconButton(
-            icon: Icon(Icons.upload_file),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ReportScreen2()),
-              );
-            },
+            icon: const Icon(Icons.upload_file),
+            onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () {
               // Handle close action
             },
@@ -161,37 +157,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Text(
                       'Given: ₹${totalAmtGiven.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: const Color.fromARGB(255, 255, 255, 255)),
+                          color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                     Text(
                       ' Profit: ₹${totalProfit.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: const Color.fromARGB(255, 255, 255, 255)),
+                          color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       ' Received: ₹${totalAmtRecieved.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: const Color.fromARGB(255, 255, 255, 255)),
+                          color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                     Text(
                       'In Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: const Color.fromARGB(255, 255, 255, 255)),
+                          color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                   ],
                 ),
@@ -253,15 +249,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontFamily: GoogleFonts.tinos().fontFamily,
                 ),
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   suffixIcon: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.add_chart_outlined,
                       color: Colors.blue,
                     ),
                     tooltip: 'View Report',
                     onPressed: () {
-                      // Perform action
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ReportScreen2()),
+                      );
                     },
                   ),
                   hintText: 'Search line',
@@ -334,11 +334,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [
-                          Color.fromARGB(255, 75, 105, 3),
-                          Color.fromARGB(255, 75, 105, 3),
-                        ],
+                          Colors.blueAccent,
+                          Colors.blue,
+                          Colors.lightBlueAccent
+                        ], // Gradient background
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -362,7 +363,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              '₹${calculatedValue.toStringAsFixed(2)}',
+                              'Bal : ₹${calculatedValue.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -392,7 +393,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         lenId);
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                         content: Text(
                                             'Line and related entries deleted successfully')),
                                   );
@@ -421,7 +422,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButtonWithText(
+      floatingActionButton: const FloatingActionButtonWithText(
         label: 'Add Line',
         navigateTo: LineScreen(),
         icon: Icons.add,

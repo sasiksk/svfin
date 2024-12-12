@@ -17,8 +17,8 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
   final int preladedduedays;
 
   LendingCombinedDetailsScreen({
-    this.preloadedamtgiven = 0.0,
-    this.preladedprofit = 0.0,
+    this.preloadedamtgiven = 0,
+    this.preladedprofit = 0,
     this.preladedlendate = '',
     this.preladedduedays = 0,
   });
@@ -32,22 +32,36 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
   final TextEditingController _dueDateController = TextEditingController();
 
   void _updateLending(BuildContext context, String lineName, String partyName,
-      int lentid) async {
+      int lentid, double preloadedamtgiven) async {
     if (_formKey.currentState?.validate() == true) {
       try {
         final double amtGiven = double.parse(_amtGivenController.text);
         final double profit = double.parse(_profitController.text);
         final double total = double.parse(_totalController.text);
 
-        final updatedValues = {
-          'LenId': lentid,
-          'amtgiven': amtGiven,
-          'profit': profit,
-          'Lentdate': _lentDateController.text,
-          'duedays': int.parse(_dueDaysController.text),
-          'amtcollected': 0.0,
-          'status': 'active',
-        };
+        final amtcoll;
+        final updatedValues;
+
+        if (preloadedamtgiven == 0) {
+          updatedValues = {
+            'LenId': lentid,
+            'amtgiven': amtGiven,
+            'profit': profit,
+            'Lentdate': _lentDateController.text,
+            'duedays': int.parse(_dueDaysController.text),
+            'amtcollected': 0.0,
+            'status': 'active',
+          };
+        } else {
+          updatedValues = {
+            'LenId': lentid,
+            'amtgiven': amtGiven,
+            'profit': profit,
+            'Lentdate': _lentDateController.text,
+            'duedays': int.parse(_dueDaysController.text),
+            'status': 'active',
+          };
+        }
 
         await dbLending.updateLending(
           lineName: lineName,
@@ -150,6 +164,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
 
     final lineName = ref.watch(currentLineNameProvider);
     final partyName = ref.watch(currentPartyNameProvider);
+    final lenId = ref.watch(lenIdProvider);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -164,14 +179,14 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Financial Details Form Section
-                Text(
+                const Text(
                   "Financial Details",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _amtGivenController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Amount Given",
                     hintText: "Enter the amount given",
                     border: OutlineInputBorder(),
@@ -184,11 +199,14 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     return null;
                   },
                   onChanged: (value) => _calculateTotal(),
+                  onTap: () {
+                    _amtGivenController.clear();
+                  },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _profitController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Profit",
                     hintText: "Enter the profit",
                     border: OutlineInputBorder(),
@@ -201,8 +219,11 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     return null;
                   },
                   onChanged: (value) => _calculateTotal(),
+                  onTap: () {
+                    _profitController.clear();
+                  },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 CustomTextField(
                   controller: _totalController,
                   labelText: "Total",
@@ -215,7 +236,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 CustomDatePicker(
                   controller: _lentDateController,
                   labelText: "Lent Date",
@@ -223,10 +244,10 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                   firstDate: DateTime(2000),
                   lastDate: DateTime.now(),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _dueDaysController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: "Due Days",
                     hintText: "Enter the due days",
                     border: OutlineInputBorder(),
@@ -238,17 +259,20 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     }
                     return null;
                   },
+                  onTap: () {
+                    _dueDaysController.clear();
+                  },
                   onChanged: (value) => _calculateDueDate(),
                   onFieldSubmitted: (value) => _calculateDueDate(),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 CustomTextField(
                   controller: _dueDateController,
                   labelText: "Due Date",
                   hintText: "Due date will be calculated",
                   readOnly: true,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 // Submit Button
                 Center(
@@ -256,26 +280,34 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                     onPressed: () {
                       if (_formKey.currentState?.validate() == true) {
                         DatabaseHelper.getLenId(lineName!, partyName!)
-                            .then((lenid) {
+                            .then((lenid) async {
                           if (lenid != null) {
-                            final lenStatus = ref.read(lenStatusProvider);
+                            final lenStatus =
+                                await dbLending.getStatusByLenId(lenid);
                             if (lenStatus == 'passive' ||
                                 preloadedamtgiven > 0) {
-                              _updateLending(
-                                  context, lineName, partyName, lenid);
+                              final db = await DatabaseHelper.getDatabase();
+                              await db.delete(
+                                'Collection',
+                                where: 'LenId = ? AND Date = ?',
+                                whereArgs: [lenId, preladedlendate],
+                              );
+                              _updateLending(context, lineName, partyName,
+                                  lenid, preloadedamtgiven);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Form Submitted')),
+                                const SnackBar(content: Text('Form Submitted')),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                     content: Text(
                                         'Error: Cannot lend amount to active state party')),
                               );
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error: LenId is null')),
+                              const SnackBar(
+                                  content: Text('Error: LenId is null')),
                             );
                           }
                         });
