@@ -480,7 +480,7 @@ class dbLending {
     required String lineName,
     required String partyName,
     required int lenId,
-    required Map<String, double> updatedValues,
+    required Map<String, dynamic> updatedValues,
   }) async {
     final db = await DatabaseHelper.getDatabase();
 

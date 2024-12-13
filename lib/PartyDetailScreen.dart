@@ -31,8 +31,12 @@ class PartyDetailScreen extends ConsumerWidget {
 
     final double currentAmtCollected = lendingData['amtcollected'];
     final double newAmtCollected = currentAmtCollected - drAmt;
+    final String status = 'active';
 
-    final updatedValues = {'amtcollected': newAmtCollected};
+    final updatedValues = {
+      'amtcollected': newAmtCollected,
+      'status': status
+    };
     await dbLending.updateAmtCollectedAndGiven(
       lineName: linename,
       partyName: partyName,

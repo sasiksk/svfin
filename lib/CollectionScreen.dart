@@ -36,9 +36,11 @@ class CollectionScreen extends ConsumerWidget {
 
     final updatedValues = {
       'amtcollected': amtCollected + collectedAmt,
-      'status': (amtgiven - collectedAmt) == 0 ? 'passive' : 'active',
+      'status':
+          (amtgiven - collectedAmt - amtCollected) == 0 ? 'passive' : 'active',
     };
-
+    print(amtgiven);
+    print(updatedValues.toString());
     await dbLending.updateDueAmt(
       lenId: lenId,
       updatedValues: updatedValues,
@@ -116,7 +118,7 @@ class CollectionScreen extends ConsumerWidget {
                         final lenStatus =
                             await dbLending.getStatusByLenId(lenid!);
                         if (lenid != null && lineName != null) {
-                          if (lenStatus == 'active') {
+                          if (lenStatus == 'active' || preloadedCid != null) {
                             if (preloadedCid != null) {
                               // Fetch the current amtCollected and dueAmt from Lending table
                               final lendingData =
@@ -125,7 +127,8 @@ class CollectionScreen extends ConsumerWidget {
                               final double currentAmtCollected =
                                   lendingData['amtcollected'];
                               final double currentgivenamt =
-                                  lendingData['amtgiven'];
+                                  lendingData['amtgiven'] +
+                                      (lendingData['profit']);
 
                               // Calculate the new amtCollected and dueAmt
                               final double newAmtCollected =
@@ -136,6 +139,7 @@ class CollectionScreen extends ConsumerWidget {
                                   currentgivenamt - newAmtCollected == 0
                                       ? 'passive'
                                       : 'active';
+                              print(status);
 
                               final amtRecieved_Line =
                                   await dbline.fetchAmtRecieved(lineName);
