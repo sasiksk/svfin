@@ -23,7 +23,7 @@ class TransactionCard extends StatelessWidget {
       ),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -39,7 +39,7 @@ class TransactionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Container(
+                /*Container(
                   decoration: BoxDecoration(
                     color: Colors.red[50], // Light pink background
                     borderRadius: BorderRadius.circular(4),
@@ -53,7 +53,7 @@ class TransactionCard extends StatelessWidget {
                       color: Colors.black54, // Grey text color
                     ),
                   ),
-                ),
+                ),*/
               ],
             ),
 

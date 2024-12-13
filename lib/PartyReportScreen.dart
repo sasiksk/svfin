@@ -118,7 +118,7 @@ class _PartyreportscreenState extends ConsumerState<Partyreportscreen> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 71, 2, 92),
+                color: Colors.blue[100],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -211,8 +211,11 @@ class _PartyreportscreenState extends ConsumerState<Partyreportscreen> {
             // Download Button
             Center(
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    generatePdf(_entries, _totalYouGave, _totalYouGot),
+                onPressed: () => generatePdf(
+                  _entries,
+                  _totalYouGave,
+                  _totalYouGot,
+                ),
                 icon: Icon(Icons.picture_as_pdf),
                 label: Text('DOWNLOAD'),
                 style: ElevatedButton.styleFrom(

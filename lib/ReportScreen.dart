@@ -11,6 +11,8 @@ class _ReportScreenState extends State<ReportScreen> {
   String? _selectedTable;
   List<Map<String, dynamic>> _tableData = [];
   List<String> _tableNames = ['Line', 'Lending', 'Collection'];
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now();
 
   @override
   void initState() {
@@ -51,6 +53,9 @@ class _ReportScreenState extends State<ReportScreen> {
                 );
               }).toList(),
             ),
+            SizedBox(height: 20),
+            Text('Start Date: ${_startDate.toLocal()}'.split(' ')[0]),
+            Text('End Date: ${_endDate.toLocal()}'.split(' ')[0]),
             SizedBox(height: 20),
             Expanded(
               child: _tableData.isEmpty

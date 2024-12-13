@@ -68,7 +68,6 @@ class CollectionScreen extends ConsumerWidget {
     final partyName = ref.watch(currentPartyNameProvider);
     final lenid = ref.watch(lenIdProvider);
     final lineName = ref.watch(currentLineNameProvider);
-    final lenStatus = dbLending.getStatusByLenId(lenid!);
 
     return Scaffold(
       appBar: AppBar(
@@ -114,7 +113,8 @@ class CollectionScreen extends ConsumerWidget {
                         final date = _dateController.text;
                         final collectedAmt =
                             double.parse(_amtCollectedController.text);
-
+                        final lenStatus =
+                            await dbLending.getStatusByLenId(lenid!);
                         if (lenid != null && lineName != null) {
                           if (lenStatus == 'active') {
                             if (preloadedCid != null) {

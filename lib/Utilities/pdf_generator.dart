@@ -3,167 +3,144 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
 import 'package:open_file/open_file.dart';
+import 'package:svf/finance_provider.dart';
 
-Future<void> generatePdf(List<Map<String, dynamic>> entries,
-    double totalYouGave, double totalYouGot) async {
+Future<void> generatePdf(
+  List<Map<String, dynamic>> entries,
+  double totalYouGave,
+  double totalYouGot,
+  // Ensure this is a String
+) async {
   final pdf = pw.Document();
 
   pdf.addPage(
-    pw.Page(
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(16),
       build: (pw.Context context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text('Report', style: pw.TextStyle(fontSize: 24)),
-            pw.SizedBox(height: 16),
-            pw.Text('Net Balance',
-                style:
-                    pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 8),
-            pw.Container(
-              padding: pw.EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.grey200,
-                borderRadius: pw.BorderRadius.circular(8),
+        return [
+          // Title Section
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Finance Name:', // Updated line
+                style: pw.TextStyle(fontSize: 16, color: PdfColors.black),
               ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              pw.SizedBox(height: 8),
+              pw.Text('Account Statement (01 Dec 2024 - 31 Dec 2024)',
+                  style: pw.TextStyle(fontSize: 16, color: PdfColors.grey)),
+              pw.SizedBox(height: 16),
+            ],
+          ),
+          // Summary Section
+          pw.Container(
+            padding: pw.EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey300,
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Total Debit(-): ₹$totalYouGave',
+                        style: pw.TextStyle(color: PdfColors.red)),
+                    pw.Text('Total Credit(+): ₹$totalYouGot',
+                        style: pw.TextStyle(color: PdfColors.green)),
+                  ],
+                ),
+                pw.Text(
+                  'Net Balance: ₹${totalYouGave - totalYouGot} Dr',
+                  style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue),
+                ),
+              ],
+            ),
+          ),
+          pw.SizedBox(height: 16),
+
+          // Table Section
+          pw.Table(
+            border: pw.TableBorder.all(),
+            columnWidths: {
+              0: pw.FlexColumnWidth(2),
+              1: pw.FlexColumnWidth(3),
+              2: pw.FlexColumnWidth(2),
+              3: pw.FlexColumnWidth(2),
+            },
+            children: [
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: PdfColors.grey300),
                 children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text('TOTAL',
-                          style: pw.TextStyle(color: PdfColors.grey)),
-                      pw.Text('${entries.length} Entries'),
-                    ],
+                  pw.Padding(
+                    padding: pw.EdgeInsets.all(8),
+                    child: pw.Text('Date',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.black)),
                   ),
-                  pw.Column(
-                    children: [
-                      pw.Text('YOU GAVE',
-                          style: pw.TextStyle(color: PdfColors.red)),
-                      pw.Text('₹ $totalYouGave',
-                          style: pw.TextStyle(color: PdfColors.red)),
-                    ],
+                  pw.Padding(
+                    padding: pw.EdgeInsets.all(8),
+                    child: pw.Text('Name',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.black)),
                   ),
-                  pw.Column(
-                    children: [
-                      pw.Text('YOU GOT',
-                          style: pw.TextStyle(color: PdfColors.green)),
-                      pw.Text('₹ $totalYouGot',
-                          style: pw.TextStyle(color: PdfColors.green)),
-                    ],
+                  pw.Padding(
+                    padding: pw.EdgeInsets.all(8),
+                    child: pw.Text('Debit(-)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.red)),
+                  ),
+                  pw.Padding(
+                    padding: pw.EdgeInsets.all(8),
+                    child: pw.Text('Credit(+)',
+                        style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.green)),
                   ),
                 ],
               ),
-            ),
-            pw.SizedBox(height: 16),
-            pw.ListView.builder(
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                var entry = entries[index];
-                var previousEntry = index > 0 ? entries[index - 1] : null;
-                bool showDateHeader = previousEntry == null ||
-                    entry['Date'] != previousEntry['Date'];
-
-                double totalCrAmt = 0.0;
-                double totalDrAmt = 0.0;
-
-                for (var e
-                    in entries.where((e) => e['Date'] == entry['Date'])) {
-                  if (e['CrAmt'] != null) {
-                    totalCrAmt += e['CrAmt'];
-                  }
-                  if (e['DrAmt'] != null) {
-                    totalDrAmt += e['DrAmt'];
-                  }
-                }
-
-                return pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+              ...entries.map((entry) {
+                return pw.TableRow(
                   children: [
-                    if (showDateHeader)
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
-                        child: pw.Container(
-                          padding: pw.EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 16),
-                          decoration: pw.BoxDecoration(
-                            color: PdfColors.grey200,
-                            borderRadius: pw.BorderRadius.circular(8),
-                          ),
-                          child: pw.Row(
-                            mainAxisAlignment:
-                                pw.MainAxisAlignment.spaceBetween,
-                            children: [
-                              pw.Text(
-                                '${entry['Date']}',
-                                style: pw.TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: pw.FontWeight.bold),
-                              ),
-                              pw.Text(
-                                'You Gave: ₹ ${totalCrAmt != 0.0 ? totalCrAmt : 'null'}',
-                                style: pw.TextStyle(color: PdfColors.red),
-                              ),
-                              pw.Text(
-                                'You Got: ₹ ${totalDrAmt != 0.0 ? totalDrAmt : 'null'}',
-                                style: pw.TextStyle(color: PdfColors.green),
-                              ),
-                            ],
-                          ),
-                        ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text('${entry['Date']}',
+                          style: pw.TextStyle(fontSize: 12)),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text('${entry['PartyName']}',
+                          style: pw.TextStyle(fontSize: 12)),
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        entry['CrAmt'] != null ? '₹${entry['CrAmt']}' : '',
+                        style: pw.TextStyle(fontSize: 12, color: PdfColors.red),
                       ),
-                    pw.Container(
-                      padding:
-                          pw.EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey200,
-                        borderRadius: pw.BorderRadius.circular(8),
-                      ),
-                      child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text(
-                                entry['PartyName'] != null &&
-                                        entry['PartyName'].length >= 4
-                                    ? entry['PartyName'].substring(0, 4)
-                                    : entry['PartyName'] ?? '',
-                                style: pw.TextStyle(color: PdfColors.grey),
-                              ),
-                            ],
-                          ),
-                          pw.Column(
-                            children: [
-                              pw.Text(
-                                entry['CrAmt'] != 0.0
-                                    ? '₹ ${entry['CrAmt']}'
-                                    : '',
-                                style: pw.TextStyle(color: PdfColors.red),
-                              ),
-                            ],
-                          ),
-                          pw.Column(
-                            children: [
-                              pw.Text(
-                                entry['DrAmt'] != 0.0
-                                    ? '₹ ${entry['DrAmt']}'
-                                    : '',
-                                style: pw.TextStyle(color: PdfColors.green),
-                              ),
-                            ],
-                          ),
-                        ],
+                    ),
+                    pw.Padding(
+                      padding: pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        entry['DrAmt'] != null ? '₹${entry['DrAmt']}' : '',
+                        style:
+                            pw.TextStyle(fontSize: 12, color: PdfColors.green),
                       ),
                     ),
                   ],
                 );
-              },
-            ),
-          ],
-        );
+              }).toList(),
+            ],
+          ),
+        ];
       },
     ),
   );

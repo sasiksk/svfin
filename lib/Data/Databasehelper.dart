@@ -687,6 +687,7 @@ class dbLending {
     required String partyName,
     required int lenId,
     required Map<String, dynamic> updatedValues,
+    int? cid,
   }) async {
     final db = await DatabaseHelper.getDatabase();
 
@@ -700,23 +701,34 @@ class dbLending {
 
     final lentDate = updatedValues['Lentdate'];
     final total = updatedValues['amtgiven'] + updatedValues['profit'];
-    print(lenId.toString());
-
-    await db.delete(
-      'Collection',
-      where: 'LenId = ? AND Date = ?',
-      whereArgs: [lenId, lentDate],
-    );
-
     await db.insert(
       'Collection',
       {
+        'cid': cid,
         'LenId': lenId,
         'Date': lentDate,
         'CrAmt': total,
         'DrAmt': 0.0,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<void> updateLending2({
+    required String lineName,
+    required String partyName,
+    required int lenId,
+    required Map<String, dynamic> updatedValues,
+    int? cid,
+  }) async {
+    final db = await DatabaseHelper.getDatabase();
+
+    // Update the entry
+    await db.update(
+      'Lending',
+      updatedValues,
+      where: 'LineName = ? AND PartyName = ?',
+      whereArgs: [lineName, partyName],
     );
   }
 }

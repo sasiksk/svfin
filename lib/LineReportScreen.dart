@@ -20,6 +20,7 @@ class Linereportscreen extends ConsumerStatefulWidget {
 class _LinereportscreenState extends ConsumerState<Linereportscreen> {
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
+
   List<Map<String, dynamic>> _entries = [];
   double _totalYouGave = 0.0;
   double _totalYouGot = 0.0;

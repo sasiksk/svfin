@@ -10,19 +10,9 @@ import 'package:svf/Utilities/CustomTextField.dart';
 import 'package:svf/finance_provider.dart';
 import 'package:intl/intl.dart';
 
-class LendingCombinedDetailsScreen extends ConsumerWidget {
-  final double preloadedamtgiven;
-  final double preladedprofit;
-  final String preladedlendate;
-  final int preladedduedays;
-  final int cid;
-
-  LendingCombinedDetailsScreen({
-    this.preloadedamtgiven = 0,
-    this.preladedprofit = 0,
-    this.preladedlendate = '',
-    this.preladedduedays = 0,
-    this.cid = 0,
+class LendingCombinedDetailsScreen2 extends ConsumerWidget {
+  LendingCombinedDetailsScreen2({
+    super.key,
   });
 
   final _formKey = GlobalKey<FormState>();
@@ -34,27 +24,23 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
   final TextEditingController _dueDateController = TextEditingController();
 
   void _updateLending(BuildContext context, String lineName, String partyName,
-      int lentid, double preloadedamtgiven) async {
+      int lentid) async {
     if (_formKey.currentState?.validate() == true) {
       try {
         final double amtGiven = double.parse(_amtGivenController.text);
         final double profit = double.parse(_profitController.text);
-        final total = amtGiven + profit;
+
         final updatedValues = {
           'LenId': lentid,
           'amtgiven': amtGiven,
           'profit': profit,
           'Lentdate': _lentDateController.text,
           'duedays': int.parse(_dueDaysController.text),
+          'amtcollected': 0.0,
           'status': 'active',
         };
-        await CollectionDB.updateCollection(
-            cid: cid,
-            lenId: lentid,
-            date: _lentDateController.text,
-            crAmt: total,
-            drAmt: 0.0);
-        await dbLending.updateLending2(
+
+        await dbLending.updateLending(
           lineName: lineName,
           partyName: partyName,
           lenId: lentid,
@@ -74,14 +60,9 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
           final double existingAmtGiven = existingEntry['Amtgiven'];
           final double existingProfit = existingEntry['Profit'];
 
-          print('existingAmtGiven: $existingAmtGiven');
-          print('preloadedamtgiven: $preloadedamtgiven');
-          print('amtGiven: $amtGiven');
-          final double newAmtGiven =
-              existingAmtGiven - preloadedamtgiven + amtGiven;
-          print('newAmtGiven: $newAmtGiven');
-          final double newProfit = existingProfit - preladedprofit + profit;
-          print('newProfit: $newProfit');
+          final double newAmtGiven = existingAmtGiven + amtGiven;
+
+          final double newProfit = existingProfit + profit;
 
           // Update the Line table with new values
           await dbline.updateLineAmounts(
@@ -127,19 +108,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    _amtGivenController.text = preloadedamtgiven.toString();
-    _profitController.text = preladedprofit.toString();
-    if (preladedlendate.isNotEmpty) {
-      _lentDateController.text = DateFormat('dd-MM-yyyy')
-          .format(DateFormat('dd-MM-yyyy').parse(preladedlendate));
-    }
-    _dueDaysController.text = preladedduedays.toString();
-
     // Call the calculation methods to update the total and due date
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _calculateTotal();
-      _calculateDueDate();
-    });
 
     final lineName = ref.watch(currentLineNameProvider);
     final partyName = ref.watch(currentPartyNameProvider);
@@ -263,10 +232,9 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                           if (lenid != null) {
                             final lenStatus =
                                 await dbLending.getStatusByLenId(lenid);
-                            if (lenStatus == 'passive' ||
-                                preloadedamtgiven > 0) {
-                              _updateLending(context, lineName, partyName,
-                                  lenid, preloadedamtgiven);
+                            if (lenStatus == 'passive') {
+                              _updateLending(
+                                  context, lineName, partyName, lenid);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Form Submitted')),
                               );
@@ -286,7 +254,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                         });
                       }
                     },
-                    child: Text(preloadedamtgiven > 0 ? "Update" : "Submit"),
+                    child: const Text("Submit"),
                   ),
                 ),
               ],

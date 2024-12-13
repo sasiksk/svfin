@@ -12,6 +12,7 @@ import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 
 import 'package:svf/Utilities/TransactionCard.dart';
+import 'package:svf/lendingScreen2.dart';
 
 import 'finance_provider.dart';
 import 'package:intl/intl.dart';
@@ -39,8 +40,8 @@ class PartyDetailScreen extends ConsumerWidget {
       updatedValues: updatedValues,
     );
 
-    Navigator.of(context).pop(); // Close the confirmation dialog
-    Navigator.of(context).pop(); // Close the options dialog
+    //Navigator.of(context).pop(); // Close the confirmation dialog
+    // Close the options dialog
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => PartyDetailScreen(),
@@ -54,6 +55,7 @@ class PartyDetailScreen extends ConsumerWidget {
     final partyName = ref.watch(currentPartyNameProvider);
     final lenId = ref.watch(lenIdProvider);
     final status = ref.watch(lenStatusProvider);
+    double amt;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -307,11 +309,10 @@ class PartyDetailScreen extends ConsumerWidget {
                               );
                             }
                             if (crAmt > 0) {
-                              //get the LenId for the current cid from the collection table
-
                               final partyDetails =
                                   await dbLending.getPartyDetails(lenId);
-
+                              //get the LenId for the current cid from the collection table
+                              amt = 0;
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) =>
@@ -324,6 +325,7 @@ class PartyDetailScreen extends ConsumerWidget {
                                         partyDetails?['Lentdate'] ?? '',
                                     preladedduedays:
                                         partyDetails?['duedays'] ?? 0,
+                                    cid: cid,
                                   ),
                                 ),
                               );
@@ -354,7 +356,7 @@ class PartyDetailScreen extends ConsumerWidget {
               alignment: Alignment.bottomLeft,
               child: FloatingActionButtonWithText(
                 label: 'You Gave',
-                navigateTo: LendingCombinedDetailsScreen(),
+                navigateTo: LendingCombinedDetailsScreen2(),
                 icon: Icons.add,
               ),
             ),

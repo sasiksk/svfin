@@ -107,7 +107,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
             Container(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 71, 2, 92),
+                color: Colors.green.shade900,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -116,23 +116,23 @@ class _ReportScreen2State extends State<ReportScreen2> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('TOTAL', style: TextStyle(color: Colors.grey)),
+                      Text('Total', style: TextStyle(color: Colors.white)),
                       Text('${_entries.length} Entries',
-                          style: TextStyle(color: Colors.grey)),
+                          style: TextStyle(color: Colors.white)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text('YOU GAVE', style: TextStyle(color: Colors.red)),
+                      Text('You Gave', style: TextStyle(color: Colors.yellow)),
                       Text('₹ $_totalYouGave',
-                          style: TextStyle(color: Colors.red)),
+                          style: TextStyle(color: Colors.yellow)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text('YOU GOT', style: TextStyle(color: Colors.green)),
+                      Text('You Got', style: TextStyle(color: Colors.white)),
                       Text('₹ $_totalYouGot',
-                          style: TextStyle(color: Colors.green)),
+                          style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ],
