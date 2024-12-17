@@ -117,8 +117,8 @@ class DatabaseHelper {
     LenId INTEGER NOT NULL,
     Date date NOT NULL,
     CrAmt REAL,
-    DrAmt REAL,
-    balance REAL
+    DrAmt REAL
+   
   )
 ''');
 

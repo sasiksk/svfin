@@ -3,15 +3,40 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
 import 'package:open_file/open_file.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/finance_provider.dart';
+import 'package:flutter/services.dart';
+
+class PdfEntry {
+  final String partyName;
+  final String date;
+  final double drAmt;
+  final double crAmt;
+
+  PdfEntry({
+    required this.partyName,
+    required this.date,
+    required this.drAmt,
+    required this.crAmt,
+  });
+}
 
 Future<void> generatePdf(
-  List<Map<String, dynamic>> entries,
+  List<PdfEntry> entries, // Change the type to List<PdfEntry>
   double totalYouGave,
   double totalYouGot,
-  // Ensure this is a String
+  String start,
+  String end,
+  WidgetRef ref,
 ) async {
   final pdf = pw.Document();
+
+  // Load custom font from assets
+  final fontData = await rootBundle.load("assets/fonts/Roboto-Regular.ttf");
+  final ttf = pw.Font.ttf(fontData);
+
+  // Fetch finance name from provider
+  final financeName = ref.read(financeNameProvider);
 
   pdf.addPage(
     pw.MultiPage(
@@ -24,12 +49,14 @@ Future<void> generatePdf(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Finance Name:', // Updated line
-                style: pw.TextStyle(fontSize: 16, color: PdfColors.black),
+                'Finance Name: $financeName',
+                style: pw.TextStyle(
+                    font: ttf, fontSize: 16, color: PdfColors.black),
               ),
               pw.SizedBox(height: 8),
-              pw.Text('Account Statement (01 Dec 2024 - 31 Dec 2024)',
-                  style: pw.TextStyle(fontSize: 16, color: PdfColors.grey)),
+              pw.Text('Account Statement ($start - $end)',
+                  style: pw.TextStyle(
+                      font: ttf, fontSize: 16, color: PdfColors.grey)),
               pw.SizedBox(height: 16),
             ],
           ),
@@ -46,15 +73,16 @@ Future<void> generatePdf(
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('Total Debit(-): ₹$totalYouGave',
-                        style: pw.TextStyle(color: PdfColors.red)),
-                    pw.Text('Total Credit(+): ₹$totalYouGot',
-                        style: pw.TextStyle(color: PdfColors.green)),
+                    pw.Text('Total Debit(-): \u20B9$totalYouGave',
+                        style: pw.TextStyle(font: ttf, color: PdfColors.red)),
+                    pw.Text('Total Credit(+): \u20B9$totalYouGot',
+                        style: pw.TextStyle(font: ttf, color: PdfColors.green)),
                   ],
                 ),
                 pw.Text(
-                  'Net Balance: ₹${totalYouGave - totalYouGot} Dr',
+                  'Net Balance: \u20B9${totalYouGot - totalYouGave} Cr',
                   style: pw.TextStyle(
+                      font: ttf,
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.blue),
@@ -81,6 +109,7 @@ Future<void> generatePdf(
                     padding: pw.EdgeInsets.all(8),
                     child: pw.Text('Date',
                         style: pw.TextStyle(
+                            font: ttf,
                             fontWeight: pw.FontWeight.bold,
                             color: PdfColors.black)),
                   ),
@@ -88,6 +117,7 @@ Future<void> generatePdf(
                     padding: pw.EdgeInsets.all(8),
                     child: pw.Text('Name',
                         style: pw.TextStyle(
+                            font: ttf,
                             fontWeight: pw.FontWeight.bold,
                             color: PdfColors.black)),
                   ),
@@ -95,6 +125,7 @@ Future<void> generatePdf(
                     padding: pw.EdgeInsets.all(8),
                     child: pw.Text('Debit(-)',
                         style: pw.TextStyle(
+                            font: ttf,
                             fontWeight: pw.FontWeight.bold,
                             color: PdfColors.red)),
                   ),
@@ -102,6 +133,7 @@ Future<void> generatePdf(
                     padding: pw.EdgeInsets.all(8),
                     child: pw.Text('Credit(+)',
                         style: pw.TextStyle(
+                            font: ttf,
                             fontWeight: pw.FontWeight.bold,
                             color: PdfColors.green)),
                   ),
@@ -112,27 +144,28 @@ Future<void> generatePdf(
                   children: [
                     pw.Padding(
                       padding: pw.EdgeInsets.all(8),
-                      child: pw.Text('${entry['Date']}',
-                          style: pw.TextStyle(fontSize: 12)),
+                      child: pw.Text(entry.date,
+                          style: pw.TextStyle(font: ttf, fontSize: 12)),
                     ),
                     pw.Padding(
                       padding: pw.EdgeInsets.all(8),
-                      child: pw.Text('${entry['PartyName']}',
-                          style: pw.TextStyle(fontSize: 12)),
+                      child: pw.Text(entry.partyName,
+                          style: pw.TextStyle(font: ttf, fontSize: 12)),
                     ),
                     pw.Padding(
                       padding: pw.EdgeInsets.all(8),
                       child: pw.Text(
-                        entry['CrAmt'] != null ? '₹${entry['CrAmt']}' : '',
-                        style: pw.TextStyle(fontSize: 12, color: PdfColors.red),
+                        entry.drAmt != 0.0 ? '\u20B9${entry.drAmt}' : '',
+                        style: pw.TextStyle(
+                            font: ttf, fontSize: 12, color: PdfColors.red),
                       ),
                     ),
                     pw.Padding(
                       padding: pw.EdgeInsets.all(8),
                       child: pw.Text(
-                        entry['DrAmt'] != null ? '₹${entry['DrAmt']}' : '',
-                        style:
-                            pw.TextStyle(fontSize: 12, color: PdfColors.green),
+                        entry.crAmt != 0.0 ? '\u20B9${entry.crAmt}' : '',
+                        style: pw.TextStyle(
+                            font: ttf, fontSize: 12, color: PdfColors.green),
                       ),
                     ),
                   ],

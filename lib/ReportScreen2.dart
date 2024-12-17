@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
 import 'package:open_file/open_file.dart';
 import 'package:svf/Utilities/pdf_generator.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:svf/finance_provider.dart';
 
 class ReportScreen2 extends StatefulWidget {
   @override
@@ -18,7 +20,7 @@ class ReportScreen2 extends StatefulWidget {
 class _ReportScreen2State extends State<ReportScreen2> {
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
-  List<Map<String, dynamic>> _entries = [];
+  List<PdfEntry> _entries = []; // Change the type to List<PdfEntry>
   double _totalYouGave = 0.0;
   double _totalYouGot = 0.0;
 
@@ -33,10 +35,10 @@ class _ReportScreen2State extends State<ReportScreen2> {
       List<Map<String, dynamic>> entries =
           await CollectionDB.getEntriesBetweenDates(startDate, endDate);
 
-      // Sort entries by date
-
       double totalYouGave = 0.0;
       double totalYouGot = 0.0;
+
+      List<PdfEntry> pdfEntries = []; // Create a list of PdfEntry
 
       for (var entry in entries) {
         if (entry['CrAmt'] != null) {
@@ -45,10 +47,23 @@ class _ReportScreen2State extends State<ReportScreen2> {
         if (entry['DrAmt'] != null) {
           totalYouGot += entry['DrAmt'];
         }
+
+        // Fetch party name
+        String partyName =
+            await DatabaseHelper.getPartyNameByLenId(entry['LenId']) ??
+                'Unknown';
+
+        // Add to pdfEntries
+        pdfEntries.add(PdfEntry(
+          partyName: partyName,
+          date: entry['Date'],
+          drAmt: entry['DrAmt'] ?? 0.0,
+          crAmt: entry['CrAmt'] ?? 0.0,
+        ));
       }
 
       setState(() {
-        _entries = entries;
+        _entries = pdfEntries;
         _totalYouGave = totalYouGave;
         _totalYouGot = totalYouGot;
       });
@@ -77,16 +92,19 @@ class _ReportScreen2State extends State<ReportScreen2> {
                 Expanded(
                   child: CustomDatePicker(
                     controller: _startDateController,
-                    labelText: 'START DATE',
+                    labelText: 'Start Date',
                     hintText: 'Pick a start date',
+                    lastDate: DateTime.now(),
                   ),
                 ),
                 SizedBox(width: 8),
                 Expanded(
                   child: CustomDatePicker(
                     controller: _endDateController,
-                    labelText: 'END DATE',
+                    labelText: 'End Date',
                     hintText: 'Pick an end date',
+                    lastDate:
+                        DateTime.now(), // Ensure end date does not exceed today
                   ),
                 ),
               ],
@@ -147,137 +165,123 @@ class _ReportScreen2State extends State<ReportScreen2> {
                 itemBuilder: (context, index) {
                   var entry = _entries[index];
                   var previousEntry = index > 0 ? _entries[index - 1] : null;
-                  bool showDateHeader = previousEntry == null ||
-                      entry['Date'] != previousEntry['Date'];
+                  bool showDateHeader =
+                      previousEntry == null || entry.date != previousEntry.date;
 
                   double totalCrAmt = 0.0;
                   double totalDrAmt = 0.0;
 
-                  for (var e
-                      in _entries.where((e) => e['Date'] == entry['Date'])) {
-                    if (e['CrAmt'] != null) {
-                      totalCrAmt += e['CrAmt'];
-                    }
-                    if (e['DrAmt'] != null) {
-                      totalDrAmt += e['DrAmt'];
-                    }
+                  for (var e in _entries.where((e) => e.date == entry.date)) {
+                    totalCrAmt += e.crAmt;
+                    totalDrAmt += e.drAmt;
                   }
 
-                  return FutureBuilder<String?>(
-                    future: DatabaseHelper.getPartyNameByLenId(entry['LenId']),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        String partyName = snapshot.data ?? 'Unknown';
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (showDateHeader)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 16, horizontal: 16),
-                                  decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 219, 247, 169),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${DateFormat('dd-MM').format(DateFormat('dd-MM-yyyy').parse(entry['Date']))}',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Text(
-                                        '₹${totalCrAmt != 0.0 ? totalCrAmt : 0.0}',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      Text(
-                                        '₹${totalDrAmt != 0.0 ? totalDrAmt : 0.0}',
-                                        style: TextStyle(color: Colors.green),
-                                      ),
-                                    ],
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (showDateHeader)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 219, 247, 169),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${DateFormat('dd-MM').format(DateFormat('dd-MM-yyyy').parse(entry.date))}',
+                                  style: TextStyle(
+                                    fontSize: 14,
                                   ),
                                 ),
-                              ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 16),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        partyName.length >= 4
-                                            ? partyName.substring(0, 4)
-                                            : partyName,
-                                        style: TextStyle(color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        entry['CrAmt'] != 0.0
-                                            ? '₹${entry['CrAmt']}'
-                                            : '',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        entry['DrAmt'] != 0.0
-                                            ? '₹${entry['DrAmt']}'
-                                            : '',
-                                        style: TextStyle(color: Colors.green),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                Text(
+                                  '₹${totalCrAmt != 0.0 ? totalCrAmt : 0.0}',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                Text(
+                                  '₹${totalDrAmt != 0.0 ? totalDrAmt : 0.0}',
+                                  style: TextStyle(color: Colors.green),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.partyName.length >= 4
+                                      ? entry.partyName.substring(0, 4)
+                                      : entry.partyName,
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  entry.crAmt != 0.0 ? '₹${entry.crAmt}' : '',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  entry.drAmt != 0.0 ? '₹${entry.drAmt}' : '',
+                                  style: TextStyle(color: Colors.green),
+                                ),
+                              ],
                             ),
                           ],
-                        );
-                      }
-                    },
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
             ),
 
             // Download Button
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () =>
-                    generatePdf(_entries, _totalYouGave, _totalYouGot),
-                icon: Icon(Icons.picture_as_pdf),
-                label: Text('DOWNLOAD'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+
+            Consumer(
+              builder: (context, ref, child) {
+                return Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () => generatePdf(
+                      _entries,
+                      _totalYouGave,
+                      _totalYouGot,
+                      _startDateController.text,
+                      _endDateController.text,
+                      ref, // Pass the ref to generatePdf
+                    ),
+                    icon: Icon(Icons.picture_as_pdf),
+                    label: Text('DOWNLOAD'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),

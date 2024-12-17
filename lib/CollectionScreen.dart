@@ -135,50 +135,128 @@ class CollectionScreen extends ConsumerWidget {
                                   currentAmtCollected +
                                       collectedAmt -
                                       preloadedAmtCollected!;
-                              final String status =
-                                  currentgivenamt - newAmtCollected == 0
-                                      ? 'passive'
-                                      : 'active';
-                              print(status);
 
-                              final amtRecieved_Line =
-                                  await dbline.fetchAmtRecieved(lineName);
-                              final newamtrecived = amtRecieved_Line +
-                                  collectedAmt -
-                                  preloadedAmtCollected!;
-                              await dbline.updateLine(
-                                  lineName: lineName,
-                                  updatedValues: {
-                                    'Amtrecieved': newamtrecived
-                                  });
+                              if (currentgivenamt >= newAmtCollected) {
+                                print(
+                                    'NEW COLLECTED AMT EXCEEDING THE GIVEN AMT ');
+                                final String status =
+                                    currentgivenamt - newAmtCollected == 0
+                                        ? 'passive'
+                                        : 'active';
+                                print(status);
 
-                              await dbLending.updateLendingAmounts(
+                                final amtRecieved_Line =
+                                    await dbline.fetchAmtRecieved(lineName);
+                                final newamtrecived = amtRecieved_Line +
+                                    collectedAmt -
+                                    preloadedAmtCollected!;
+                                await dbline.updateLine(
+                                    lineName: lineName,
+                                    updatedValues: {
+                                      'Amtrecieved': newamtrecived
+                                    });
+
+                                await dbLending.updateLendingAmounts(
+                                    lenId: lenid,
+                                    newAmtCollected: newAmtCollected,
+                                    status: status);
+
+                                //newDueAmt: newDueAmt);
+                                // Update existing record in Collection table
+                                await CollectionDB.updateCollection(
+                                  cid: preloadedCid!,
                                   lenId: lenid,
-                                  newAmtCollected: newAmtCollected,
-                                  status: status);
+                                  date: date,
+                                  crAmt: 0.0,
+                                  drAmt: collectedAmt,
+                                );
+                              } else {
+                                print('error');
+                                // filepath: /path/to/CollectionScreen.dart
+                                Future.delayed(Duration.zero, () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Error"),
+                                        content: const Text(
+                                            'Amount exceeds original. Can\'t Update.'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PartyDetailScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text("OK"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                });
+                              }
+                            }
+                            // Insert new record
+                            else {
+                              final lendingData =
+                                  await dbLending.fetchLendingData(lenid);
 
-                              //newDueAmt: newDueAmt);
-                              // Update existing record in Collection table
-                              await CollectionDB.updateCollection(
-                                cid: preloadedCid!,
-                                lenId: lenid,
-                                date: date,
-                                crAmt: 0.0,
-                                drAmt: collectedAmt,
-                              );
-                            } else {
-                              // Insert new record
-                              final cid = await _getNextCid();
-                              await CollectionDB.insertCollection(
-                                cid: cid,
-                                lenId: lenid,
-                                date: date,
-                                crAmt: 0.0,
-                                drAmt: collectedAmt,
-                              );
+                              final double currentAmtCollected =
+                                  lendingData['amtcollected'];
+                              final double currentgivenamt =
+                                  lendingData['amtgiven'] +
+                                      (lendingData['profit']);
 
-                              await _updateLendingData(lenid, collectedAmt);
-                              await _updateAmtRecieved(lineName, collectedAmt);
+                              // Calculate the new amtCollected and dueAmt
+                              final double newAmtCollected =
+                                  currentAmtCollected + collectedAmt;
+
+                              if (currentgivenamt >= newAmtCollected) {
+                                final cid = await _getNextCid();
+                                await CollectionDB.insertCollection(
+                                  cid: cid,
+                                  lenId: lenid,
+                                  date: date,
+                                  crAmt: 0.0,
+                                  drAmt: collectedAmt,
+                                );
+
+                                await _updateLendingData(lenid, collectedAmt);
+                                await _updateAmtRecieved(
+                                    lineName, collectedAmt);
+                              } else {
+                                Future.delayed(Duration.zero, () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Error"),
+                                        content: const Text(
+                                            'Amount exceeds original. Can\'t Update.'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PartyDetailScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text("OK"),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                });
+                              }
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(

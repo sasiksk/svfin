@@ -33,10 +33,7 @@ class PartyDetailScreen extends ConsumerWidget {
     final double newAmtCollected = currentAmtCollected - drAmt;
     final String status = 'active';
 
-    final updatedValues = {
-      'amtcollected': newAmtCollected,
-      'status': status
-    };
+    final updatedValues = {'amtcollected': newAmtCollected, 'status': status};
     await dbLending.updateAmtCollectedAndGiven(
       lineName: linename,
       partyName: partyName,
@@ -285,6 +282,7 @@ class PartyDetailScreen extends ConsumerWidget {
                   return const Center(child: Text('No entries found.'));
                 } else {
                   final entries = snapshot.data!;
+
                   // Assuming you start with a 0 balance
                   return ListView.builder(
                     itemCount: entries.length,

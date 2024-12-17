@@ -280,10 +280,14 @@ class _LinereportscreenState extends ConsumerState<Linereportscreen> {
             ),
 
             // Download Button
-            Center(
+            /* Center(
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    generatePdf(_entries, _totalYouGave, _totalYouGot),
+                onPressed: () => generatePdf(
+                    _entries,
+                    _totalYouGave,
+                    _totalYouGot,
+                    _startDateController.text,
+                    _endDateController.text),
                 icon: Icon(Icons.picture_as_pdf),
                 label: Text('DOWNLOAD'),
                 style: ElevatedButton.styleFrom(
@@ -294,7 +298,7 @@ class _LinereportscreenState extends ConsumerState<Linereportscreen> {
                   ),
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ),

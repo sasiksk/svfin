@@ -40,65 +40,102 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
         final double amtGiven = double.parse(_amtGivenController.text);
         final double profit = double.parse(_profitController.text);
         final total = amtGiven + profit;
-        final updatedValues = {
-          'LenId': lentid,
-          'amtgiven': amtGiven,
-          'profit': profit,
-          'Lentdate': _lentDateController.text,
-          'duedays': int.parse(_dueDaysController.text),
-          'status': 'active',
-        };
-        await CollectionDB.updateCollection(
+
+        final amtcolldata = await dbLending.getPartyDetails(lentid);
+
+        final double existingAmtcollected = amtcolldata!['amtcollected'];
+
+        if (total >= existingAmtcollected) {
+          final updatedValues = {
+            'LenId': lentid,
+            'amtgiven': amtGiven,
+            'profit': profit,
+            'Lentdate': _lentDateController.text,
+            'duedays': int.parse(_dueDaysController.text),
+            'status': 'active',
+          };
+
+          print(total.toString());
+          await CollectionDB.updateCollection(
             cid: cid,
             lenId: lentid,
             date: _lentDateController.text,
             crAmt: total,
-            drAmt: 0.0);
-        await dbLending.updateLending2(
-          lineName: lineName,
-          partyName: partyName,
-          lenId: lentid,
-          updatedValues: updatedValues,
-        );
-
-        // Fetch existing values from the Line table
-        final db = await DatabaseHelper.getDatabase();
-        final List<Map<String, dynamic>> existingEntries = await db.query(
-          'Line',
-          where: 'LOWER(Linename) = ?',
-          whereArgs: [lineName.toLowerCase()],
-        );
-
-        if (existingEntries.isNotEmpty) {
-          final existingEntry = existingEntries.first;
-          final double existingAmtGiven = existingEntry['Amtgiven'];
-          final double existingProfit = existingEntry['Profit'];
-
-          print('existingAmtGiven: $existingAmtGiven');
-          print('preloadedamtgiven: $preloadedamtgiven');
-          print('amtGiven: $amtGiven');
-          final double newAmtGiven =
-              existingAmtGiven - preloadedamtgiven + amtGiven;
-          print('newAmtGiven: $newAmtGiven');
-          final double newProfit = existingProfit - preladedprofit + profit;
-          print('newProfit: $newProfit');
-
-          // Update the Line table with new values
-          await dbline.updateLineAmounts(
-            lineName: lineName,
-            amtGiven: newAmtGiven,
-            profit: newProfit,
+            drAmt: 0.0,
           );
+          await dbLending.updateLending2(
+            lineName: lineName,
+            partyName: partyName,
+            lenId: lentid,
+            updatedValues: updatedValues,
+          );
+
+          // Fetch existing values from the Line table
+          final db = await DatabaseHelper.getDatabase();
+          final List<Map<String, dynamic>> existingEntries = await db.query(
+            'Line',
+            where: 'LOWER(Linename) = ?',
+            whereArgs: [lineName.toLowerCase()],
+          );
+
+          if (existingEntries.isNotEmpty) {
+            final existingEntry = existingEntries.first;
+            final double existingAmtGiven = existingEntry['Amtgiven'];
+            final double existingProfit = existingEntry['Profit'];
+
+            print('existingAmtGiven: $existingAmtGiven');
+            print('preloadedamtgiven: $preloadedamtgiven');
+            print('amtGiven: $amtGiven');
+            final double newAmtGiven =
+                existingAmtGiven - preloadedamtgiven + amtGiven;
+            print('newAmtGiven: $newAmtGiven');
+            final double newProfit = existingProfit - preladedprofit + profit;
+            print('newProfit: $newProfit');
+
+            // Update the Line table with new values
+            await dbline.updateLineAmounts(
+              lineName: lineName,
+              amtGiven: newAmtGiven,
+              profit: newProfit,
+            );
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lending details updated successfully')),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PartyDetailScreen()),
+          );
+        } else {
+          // filepath: /path/to/CollectionScreen.dart
+          Future.delayed(Duration.zero, () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Error"),
+                  content: const Text(
+                      'Total Amount is below the Collected Amount. Can\'t Update.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PartyDetailScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("OK"),
+                    ),
+                  ],
+                );
+              },
+            );
+          });
         }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lending details updated successfully')),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-        );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating lending details: $e')),
@@ -267,9 +304,6 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                                 preloadedamtgiven > 0) {
                               _updateLending(context, lineName, partyName,
                                   lenid, preloadedamtgiven);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Form Submitted')),
-                              );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
