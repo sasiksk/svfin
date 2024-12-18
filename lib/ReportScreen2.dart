@@ -260,6 +260,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
 
             Consumer(
               builder: (context, ref, child) {
+                final finnaame = ref.watch(financeProvider);
                 return Center(
                   child: ElevatedButton.icon(
                     onPressed: () => generatePdf(
@@ -268,7 +269,9 @@ class _ReportScreen2State extends State<ReportScreen2> {
                       _totalYouGot,
                       _startDateController.text,
                       _endDateController.text,
-                      ref, // Pass the ref to generatePdf
+                      ref,
+                      finnaame,
+                      // Pass the ref to generatePdf
                     ),
                     icon: Icon(Icons.picture_as_pdf),
                     label: Text('DOWNLOAD'),

@@ -7,13 +7,13 @@ class TransactionCard extends StatelessWidget {
   final double cramount;
   final double dramount;
 
-  const TransactionCard(
-      {Key? key,
-      required this.dateTime,
-      required this.balance,
-      required this.cramount,
-      required this.dramount})
-      : super(key: key);
+  const TransactionCard({
+    Key? key,
+    required this.dateTime,
+    required this.balance,
+    required this.cramount,
+    required this.dramount,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class TransactionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                /*Container(
+                /* Container(
                   decoration: BoxDecoration(
                     color: Colors.red[50], // Light pink background
                     borderRadius: BorderRadius.circular(4),

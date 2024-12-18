@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
+import 'package:svf/Utilities/pdf_generator2.dart';
 
 class DatabaseHelper {
   static Future<List<int>> getLenIdsByLineName(String lineName) async {
@@ -292,6 +293,23 @@ class dbline {
 }
 
 class dbLending {
+  static Future<List<PdfEntry>> fetchLendingEntries() async {
+    final db = await DatabaseHelper.getDatabase();
+    final List<Map<String, dynamic>> result = await db.query('Lending');
+
+    return result.map((entry) {
+      return PdfEntry(
+        lineName: entry['LineName'],
+        partyName: entry['PartyName'],
+        amtGiven: entry['amtgiven'],
+        profit: entry['profit'],
+        amtCollected: entry['amtcollected'],
+        balanceAmt:
+            (entry['amtgiven'] + entry['profit']) - entry['amtcollected'],
+      );
+    }).toList();
+  }
+
   static Future<String?> getStatusByLenId(int lenId) async {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(

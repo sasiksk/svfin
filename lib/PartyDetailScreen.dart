@@ -56,6 +56,7 @@ class PartyDetailScreen extends ConsumerWidget {
     final partyName = ref.watch(currentPartyNameProvider);
     final lenId = ref.watch(lenIdProvider);
     final status = ref.watch(lenStatusProvider);
+    final finname = ref.watch(financeNameProvider);
     double amt;
 
     return Scaffold(

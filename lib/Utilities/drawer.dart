@@ -5,6 +5,7 @@ import 'package:svf/LendingScreen.dart';
 import 'package:svf/LineScreen.dart';
 import 'package:svf/ReportScreen.dart';
 import 'package:svf/Utilities/PartyScreen.dart';
+import 'package:svf/Utilities/ReportScreen1.dart';
 
 import 'package:svf/home_screen.dart';
 import 'package:svf/linedetailScreen.dart';
@@ -110,6 +111,16 @@ Widget buildDrawer(BuildContext context) {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => CollectionScreen()),
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.report),
+          title: const Text('Collection Screen'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ReportScreen1()),
             );
           },
         ),
