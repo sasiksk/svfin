@@ -62,6 +62,13 @@ class PartyDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: partyName ?? 'Party Details',
+        actions: [
+          //refresh
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -103,6 +110,23 @@ class PartyDetailScreen extends ConsumerWidget {
                                 .add(Duration(days: data['duedays']))
                                 .toString()
                             : null;
+
+                        final perrday = (data['totalAmtGiven'] != null &&
+                                data['totalProfit'] != null &&
+                                data['duedays'] != null &&
+                                data['duedays'] != 0)
+                            ? (data['totalAmtGiven'] + data['totalProfit']) /
+                                data['duedays']
+                            : 0.0;
+                        print('perday$perrday');
+                        final totalAmtCollected =
+                            data['totalAmtCollected'] ?? 0.0;
+                        final givendays =
+                            perrday != 0 ? totalAmtCollected / perrday : 0.0;
+                        final pendays =
+                            ((daysover ?? 0) - givendays).toStringAsFixed(2);
+                        print(pendays);
+
                         return Column(
                           children: [
                             Row(
@@ -176,6 +200,11 @@ class PartyDetailScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Duedate: ${duedate != null ? DateFormat('dd-MM-yyyy').format(DateTime.parse(duedate)) : 'N/A'}',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(width: 14),
+                                Text(
+                                  'Pending Days : $pendays',
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               ],

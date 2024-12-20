@@ -6,6 +6,8 @@ import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/finance_provider.dart';
 import 'package:intl/intl.dart';
 
+// ...existing code...
+
 class CollectionScreen extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _dateController = TextEditingController();
@@ -211,10 +213,14 @@ class CollectionScreen extends ConsumerWidget {
                               final double currentgivenamt =
                                   lendingData['amtgiven'] +
                                       (lendingData['profit']);
+                              final int sms = lendingData['sms'];
+                              final String pno = lendingData['PartyPhnone'];
 
                               // Calculate the new amtCollected and dueAmt
                               final double newAmtCollected =
                                   currentAmtCollected + collectedAmt;
+                              final double bal =
+                                  currentgivenamt - newAmtCollected;
 
                               if (currentgivenamt >= newAmtCollected) {
                                 final cid = await _getNextCid();
@@ -229,6 +235,11 @@ class CollectionScreen extends ConsumerWidget {
                                 await _updateLendingData(lenid, collectedAmt);
                                 await _updateAmtRecieved(
                                     lineName, collectedAmt);
+
+                                if (sms == 1) {
+                                  print('sms');
+                                  //await _sendSms(pno, 'Your message here');
+                                }
                               } else {
                                 Future.delayed(Duration.zero, () {
                                   showDialog(
@@ -340,4 +351,22 @@ class CollectionScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // ...existing code...
+
+  /* Future<void> _sendSms(String phoneNumber, String message) async {
+    List<String> recipients = [phoneNumber];
+
+    try {
+      String result = await sendSMS(
+        message: message,
+        recipients: recipients,
+      );
+      print(result);
+    } catch (error) {
+      print("Failed to send SMS: $error");
+    }
+  }*/
+
+// ...existing code...
 }

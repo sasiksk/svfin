@@ -8,6 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:svf/Utilities/pdf_generator2.dart';
 
 class DatabaseHelper {
+  static Future<String> getDatabasePath() async {
+    final dbPath = await sql.getDatabasesPath();
+    final pathToDb = path.join(dbPath, 'finance3.db');
+    return pathToDb;
+  }
+
   static Future<List<int>> getLenIdsByLineName(String lineName) async {
     final db = await getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
@@ -199,7 +205,8 @@ class dbline {
       SELECT 
         SUM(Amtgiven) as totalAmtGiven, 
         SUM(Profit) as totalProfit, 
-        SUM(Amtrecieved) as totalAmtRecieved 
+        SUM(Amtrecieved) as totalAmtRecieved,
+        sum(expense) as totalexpense 
       FROM Line
     ''');
 
@@ -208,12 +215,14 @@ class dbline {
         'totalAmtGiven': result.first['totalAmtGiven'] as double? ?? 0.0,
         'totalProfit': result.first['totalProfit'] as double? ?? 0.0,
         'totalAmtRecieved': result.first['totalAmtRecieved'] as double? ?? 0.0,
+        'totalexpense': result.first['totalexpense'] as double? ?? 0.0,
       };
     } else {
       return {
         'totalAmtGiven': 0.0,
         'totalProfit': 0.0,
         'totalAmtRecieved': 0.0,
+        'totalexpense': 0.0,
       };
     }
   }
@@ -516,7 +525,7 @@ class dbLending {
     final db = await DatabaseHelper.getDatabase();
     final List<Map<String, dynamic>> result = await db.query(
       'Lending',
-      columns: [' amtgiven', 'profit', 'amtcollected'],
+      columns: [' amtgiven', 'profit', 'amtcollected', 'PartyPhnone', 'sms'],
       where: 'LenId = ?',
       whereArgs: [lenId],
     );

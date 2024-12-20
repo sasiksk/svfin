@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final FormFieldValidator<String>? validator;
   final TextInputType? keyboardType;
+  final bool? enabled;
 
   CustomTextField({
     required this.controller,
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.onTap,
     this.validator,
     this.keyboardType,
+    this.enabled,
   });
 
   @override

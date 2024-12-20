@@ -12,6 +12,8 @@ import 'package:svf/Utilities/drawer.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 import 'package:svf/linedetailScreen.dart';
 import 'finance_provider.dart';
+import 'package:svf/Utilities/GoogleFileUpload.dart';
+import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +23,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  // final FirebaseFileUploader uploader = FirebaseFileUploader();
+
   List<String> lineNames = [];
   List<String> originalLineNames = [];
   double totalAmtGiven = 0.0;
@@ -29,6 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Map<String, Map<String, dynamic>> lineDetailsMap = {};
   double todaysTotalDrAmt = 0.0;
   double todaysTotalCrAmt = 0.0;
+  double totalexpense = 0.0;
 
   @override
   void initState() {
@@ -65,6 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       totalAmtGiven = details['totalAmtGiven'] ?? 0.0;
       totalProfit = details['totalProfit'] ?? 0.0;
       totalAmtRecieved = details['totalAmtRecieved'] ?? 0.0;
+      totalexpense = details['totalexpense'] ?? 0.0;
     });
   }
 
@@ -132,7 +138,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.upload_file),
-            onPressed: () {},
+            onPressed: () async {
+              final dbFilePath = await DatabaseHelper.getDatabasePath();
+              File dbFile = File(dbFilePath);
+              print(dbFile.path);
+              //  await uploader.uploadFileToFirebase(dbFile);
+            },
           ),
           IconButton(
             icon: const Icon(Icons.close),
@@ -146,7 +157,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: Column(
         children: [
           EmptyCard(
-            screenHeight: MediaQuery.of(context).size.height * 1.15,
+            screenHeight: MediaQuery.of(context).size.height * 1.35,
             screenWidth: MediaQuery.of(context).size.width,
             title: 'Finance Details',
             content: Column(
@@ -182,6 +193,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           fontWeight: FontWeight.w900,
                           color: Color.fromARGB(255, 255, 255, 255)),
                     ),
+                    Text(
+                      'Expense: ₹${totalexpense.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: Color.fromARGB(255, 255, 255, 255)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                     Text(
                       'In Line: ₹${(totalAmtGiven - totalAmtRecieved + totalProfit).toStringAsFixed(2)}',
                       style: const TextStyle(
@@ -357,7 +381,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       onTap: () => handleLineSelected(lineName),
                       trailing: SizedBox(
-                        width: 150, // Adjust the width as needed
+                        width: MediaQuery.of(context).size.width *
+                            0.4, // Adjust the width as needed
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -383,19 +408,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                   );
                                 } else if (value == 'Delete') {
-                                  final lenIds = await dbLending
-                                      .getLenIdsByLineName(lineName);
-                                  await dbline.deleteLine(lineName);
-                                  await dbLending
-                                      .deleteLendingByLineName(lineName);
-                                  for (final lenId in lenIds) {
-                                    await CollectionDB.deleteEntriesByLenId(
-                                        lenId);
-                                  }
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Line and related entries deleted successfully')),
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Confirm Deletion'),
+                                        content: const Text(
+                                            'Are you sure you want to delete ! All the Parties inside the Line will be deleted'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Dismiss the dialog
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text('OK'),
+                                            onPressed: () async {
+                                              Navigator.of(context)
+                                                  .pop(); // Dismiss the dialog
+                                              final lenIds = await dbLending
+                                                  .getLenIdsByLineName(
+                                                      lineName);
+                                              await dbline.deleteLine(lineName);
+                                              await dbLending
+                                                  .deleteLendingByLineName(
+                                                      lineName);
+                                              for (final lenId in lenIds) {
+                                                await CollectionDB
+                                                    .deleteEntriesByLenId(
+                                                        lenId);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                   loadLineNames();
                                   loadLineDetails();

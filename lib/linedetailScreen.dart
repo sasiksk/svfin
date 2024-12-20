@@ -77,6 +77,12 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
       drawer: buildDrawer(context),
       appBar: CustomAppBar(
         title: lineName!,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: loadPartyNames,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -224,8 +230,8 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.blue,
-                              Colors.blue[200]!,
+                              Colors.blueGrey.shade700,
+                              Colors.blueGrey.shade500,
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -241,7 +247,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontFamily: GoogleFonts.tinos().fontFamily,
                                 ),
                               ),
@@ -250,7 +256,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontFamily: GoogleFonts.tinos().fontFamily,
                                 ),
                               ),
@@ -270,19 +276,49 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                   ),
                                 );
                               } else if (value == 'Delete') {
-                                final lenId = await DatabaseHelper.getLenId(
-                                    lineName!, partyName);
-                                if (lenId != null) {
-                                  await dbLending.deleteLendingAndCollections(
-                                      lenId, lineName);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Party and related collections deleted successfully')),
-                                  );
-                                  // Optionally, refresh the list or navigate back
-                                  loadPartyNames(); // Refresh the list after deletion
-                                }
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('Confirm Deletion'),
+                                      content: Text(
+                                          'Are you sure you want to delete this party and related collections?'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Dismiss the dialog
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text('OK'),
+                                          onPressed: () async {
+                                            Navigator.of(context)
+                                                .pop(); // Dismiss the dialog
+                                            final lenId =
+                                                await DatabaseHelper.getLenId(
+                                                    lineName!, partyName);
+                                            if (lenId != null) {
+                                              await dbLending
+                                                  .deleteLendingAndCollections(
+                                                      lenId, lineName);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                      'Party and related collections deleted successfully'),
+                                                ),
+                                              );
+                                              // Optionally, refresh the list or navigate back
+                                              loadPartyNames(); // Refresh the list after deletion
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
                               }
                             },
                             itemBuilder: (BuildContext context) {

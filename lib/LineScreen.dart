@@ -83,7 +83,7 @@ class _LineScreenState extends State<LineScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Line Screen',
+          'Add Line',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blue,
@@ -97,7 +97,7 @@ class _LineScreenState extends State<LineScreen> {
             children: [
               CustomTextField(
                 controller: _lineNameController,
-                labelText: 'Line Name',
+                labelText: 'Enter Line Name',
                 hintText: 'Enter Line Name',
                 validator: (value) {
                   if (value == null || value.isEmpty) {

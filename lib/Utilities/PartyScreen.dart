@@ -167,28 +167,38 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
                 ),
                 const SizedBox(height: 16.0),
                 if (widget.partyName != null)
-                  CustomTextField(
-                    controller: _partyidController,
-                    labelText: 'Party id',
-                    hintText: 'Enter a unique Party id',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter Party Id';
-                      }
-                      return null;
-                    },
+                  Visibility(
+                    visible: false,
+                    child: CustomTextField(
+                      controller: _partyidController,
+                      enabled: false,
+                      labelText: 'Party id',
+                      hintText: 'Enter a unique Party id',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Party Id';
+                        }
+                        return null;
+                      },
+                      // Make the text field read-only
+                    ),
                   ),
                 if (widget.partyName == null)
-                  CustomTextField(
-                    controller: _partyidController,
-                    labelText: 'Party id',
-                    hintText: 'Enter a unique Party id',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter Party Id';
-                      }
-                      return null;
-                    },
+                  Visibility(
+                    visible: false,
+                    child: CustomTextField(
+                      controller: _partyidController..text = '4',
+                      enabled: false,
+                      labelText: 'Party id',
+                      hintText: 'Enter a unique Party id',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Party Id';
+                        }
+                        return null;
+                      },
+                      // Make the text field read-only
+                    ),
                   ),
                 const SizedBox(
                   height: 10,
