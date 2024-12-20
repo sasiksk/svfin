@@ -882,7 +882,7 @@ class CollectionDB {
       'Collection',
       where: 'LenId = ?',
       whereArgs: [lenId],
-      orderBy: 'Date DESC',
+      orderBy: 'Date Desc',
     );
   }
 }

@@ -104,10 +104,11 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
             SnackBar(content: Text('Lending details updated successfully')),
           );
 
-          Navigator.pushReplacement(
+          /*Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-          );
+          );*/
+          Navigator.of(context).pop();
         } else {
           // filepath: /path/to/CollectionScreen.dart
           Future.delayed(Duration.zero, () {
@@ -121,12 +122,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PartyDetailScreen(),
-                          ),
-                        );
+                        Navigator.of(context).pop();
                       },
                       child: const Text("OK"),
                     ),

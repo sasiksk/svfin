@@ -74,7 +74,7 @@ class PartyDetailScreen extends ConsumerWidget {
         children: [
           Center(
             child: EmptyCard(
-              screenHeight: MediaQuery.of(context).size.height * 1.45,
+              screenHeight: MediaQuery.of(context).size.height * 1.85,
               screenWidth: MediaQuery.of(context).size.width,
               title: 'Party Details',
               content: Consumer(
@@ -119,12 +119,18 @@ class PartyDetailScreen extends ConsumerWidget {
                                 data['duedays']
                             : 0.0;
                         print('perday$perrday');
+
                         final totalAmtCollected =
                             data['totalAmtCollected'] ?? 0.0;
                         final givendays =
                             perrday != 0 ? totalAmtCollected / perrday : 0.0;
-                        final pendays =
-                            ((daysover ?? 0) - givendays).toStringAsFixed(2);
+                        double pendays;
+                        if (daysrem > 0) {
+                          pendays = ((daysover ?? 0) - givendays).toDouble();
+                        } else {
+                          pendays =
+                              ((data['duedays'] ?? 0) - givendays).toDouble();
+                        }
                         print(pendays);
 
                         return Column(
@@ -180,12 +186,24 @@ class PartyDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 14),
                                 Text(
+                                  'Duedate: ${duedate != null ? DateFormat('dd-MM-yyyy').format(DateTime.parse(duedate)) : 'N/A'}',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(width: 14),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Text(
                                   'Days Over: $daysover',
                                   style: const TextStyle(fontSize: 14),
                                 ),
                                 const SizedBox(width: 14),
                                 Text(
-                                  'Remaining: $daysrem',
+                                  daysrem != null && daysrem < 0
+                                      ? 'Overdue: ${daysrem.abs()}'
+                                      : 'Remaining: $daysrem',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: daysrem != null && daysrem < 0
@@ -195,20 +213,37 @@ class PartyDetailScreen extends ConsumerWidget {
                                 ),
                               ],
                             ),
+                            const Divider(
+                              thickness: 2,
+                              color: const Color.fromARGB(255, 247, 244, 244),
+                            ),
                             const SizedBox(height: 5),
                             Row(
                               children: [
                                 Text(
-                                  'Duedate: ${duedate != null ? DateFormat('dd-MM-yyyy').format(DateTime.parse(duedate)) : 'N/A'}',
+                                  'Days',
                                   style: const TextStyle(fontSize: 14),
                                 ),
-                                const SizedBox(width: 14),
                                 Text(
-                                  'Pending Days : $pendays',
+                                  'Paid: ${givendays.toStringAsFixed(2)}',
                                   style: const TextStyle(fontSize: 14),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  pendays < 0
+                                      ? 'Advance Days Paid: ${pendays.abs().toStringAsFixed(2)}'
+                                      : 'Pending: ${pendays.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: pendays < 0
+                                        ? Color.fromARGB(255, 245, 244, 247)
+                                        : Colors.white,
+                                  ),
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         );
                       }
@@ -379,28 +414,26 @@ class PartyDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: Padding(
-        padding:
-            const EdgeInsets.only(left: 16.0, right: 16, bottom: 20, top: 20),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: FloatingActionButtonWithText(
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        notchMargin: 6.0,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FloatingActionButtonWithText(
                 label: 'You Gave',
                 navigateTo: LendingCombinedDetailsScreen2(),
                 icon: Icons.add,
               ),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButtonWithText(
+              FloatingActionButtonWithText(
                 label: 'You Got',
                 navigateTo: CollectionScreen(),
                 icon: Icons.add,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

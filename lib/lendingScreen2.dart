@@ -76,10 +76,11 @@ class LendingCombinedDetailsScreen2 extends ConsumerWidget {
           SnackBar(content: Text('Lending details updated successfully')),
         );
 
-        Navigator.pushReplacement(
+        /*Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => PartyDetailScreen()),
-        );
+        );*/
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating lending details: $e')),
