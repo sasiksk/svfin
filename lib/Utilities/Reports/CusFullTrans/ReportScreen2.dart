@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/Utilities/CustomDatePicker.dart';
+import 'package:DigiVasool/Data/Databasehelper.dart';
+import 'package:DigiVasool/Utilities/CustomDatePicker.dart';
 import 'package:intl/intl.dart';
 
-import 'package:svf/Utilities/Reports/CusFullTrans/pdf_generator.dart';
+import 'package:DigiVasool/Utilities/Reports/CusFullTrans/pdf_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:svf/finance_provider.dart';
+import 'package:DigiVasool/finance_provider.dart';
 
 class ReportScreen2 extends StatefulWidget {
   @override

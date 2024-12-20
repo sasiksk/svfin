@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:svf/Screens/Main/SplashScreen.dart';
+import 'package:DigiVasool/Screens/Main/SplashScreen.dart';
 
 class IntroductionScreen extends StatelessWidget {
   const IntroductionScreen({super.key});
@@ -77,6 +77,16 @@ class IntroductionScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontFamily: GoogleFonts.tinos().fontFamily,
                   ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'Sri Selva Vinayaga Software Solutions',
+                style: GoogleFonts.tinos(
+                  textStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Color.fromARGB(137, 13, 59, 2),
+                      fontStyle: FontStyle.italic),
                 ),
               ),
             ],

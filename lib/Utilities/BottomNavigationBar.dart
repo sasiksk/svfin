@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:svf/PartyDetailScreen.dart';
-import 'package:svf/Utilities/PartyScreen.dart';
+import 'package:DigiVasool/PartyDetailScreen.dart';
+import 'package:DigiVasool/Utilities/PartyScreen.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final List<IconData> icons;

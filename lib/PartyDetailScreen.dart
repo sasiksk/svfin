@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:svf/CollectionScreen.dart';
-import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/LendingScreen.dart';
+import 'package:DigiVasool/CollectionScreen.dart';
+import 'package:DigiVasool/Data/Databasehelper.dart';
+import 'package:DigiVasool/LendingScreen.dart';
 
-import 'package:svf/Utilities/AppBar.dart';
+import 'package:DigiVasool/Utilities/AppBar.dart';
 
-import 'package:svf/Utilities/EmptyDetailsCard.dart';
-import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
-import 'package:svf/Utilities/Reports/CustomerReportScreen.dart';
+import 'package:DigiVasool/Utilities/EmptyDetailsCard.dart';
+import 'package:DigiVasool/Utilities/FloatingActionButtonWithText.dart';
+import 'package:DigiVasool/Utilities/Reports/CustomerReportScreen.dart';
 
-import 'package:svf/Utilities/TransactionCard.dart';
+import 'package:DigiVasool/Utilities/TransactionCard.dart';
 
-import 'package:svf/lendingScreen2.dart';
-import 'package:svf/linedetailScreen.dart';
+import 'package:DigiVasool/lendingScreen2.dart';
+import 'package:DigiVasool/linedetailScreen.dart';
 
 import 'finance_provider.dart';
 import 'package:intl/intl.dart';

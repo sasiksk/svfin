@@ -171,6 +171,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     ),
                   ),
                 ),
+                const Spacer(),
+                Text(
+                  'Sri Selva Vinayaga Software Solutions',
+                  style: GoogleFonts.tinos(
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                      color: Color.fromARGB(137, 13, 59, 2),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

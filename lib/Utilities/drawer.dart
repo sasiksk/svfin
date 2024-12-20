@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/Utilities/Reports/CustomerReportScreen.dart';
-import 'package:svf/home_screen.dart';
-/*import 'package:svf/CollectionScreen.dart';
+import 'package:DigiVasool/Data/Databasehelper.dart';
+import 'package:DigiVasool/Utilities/Reports/CustomerReportScreen.dart';
+import 'package:DigiVasool/home_screen.dart';
+/*import 'package:DigiVasool/CollectionScreen.dart';
 
-import 'package:svf/LendingScreen.dart';
-import 'package:svf/LineScreen.dart';
-import 'package:svf/ReportScreen.dart';
+import 'package:DigiVasool/LendingScreen.dart';
+import 'package:DigiVasool/LineScreen.dart';
+import 'package:DigiVasool/ReportScreen.dart';
 
-import 'package:svf/Utilities/PartyScreen.dart';
-import 'package:svf/Utilities/Reports/Custrans/ReportScreen1.dart';
+import 'package:DigiVasool/Utilities/PartyScreen.dart';
+import 'package:DigiVasool/Utilities/Reports/Custrans/ReportScreen1.dart';
 
 
-import 'package:svf/linedetailScreen.dart';*/
+import 'package:DigiVasool/linedetailScreen.dart';*/
 
 Widget buildDrawer(BuildContext context) {
   return Drawer(

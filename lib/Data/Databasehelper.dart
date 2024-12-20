@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:sqflite/sqflite.dart';
 import 'dart:math';
 import 'package:intl/intl.dart';
-import 'package:svf/Utilities/Reports/Custrans/pdf_generator2.dart';
+import 'package:DigiVasool/Utilities/Reports/Custrans/pdf_generator2.dart';
 
 class DatabaseHelper {
   static Future<String> getDatabasePath() async {

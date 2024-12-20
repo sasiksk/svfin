@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:svf/Data/Databasehelper.dart';
+import 'package:DigiVasool/Data/Databasehelper.dart';
 
-import 'package:svf/PartyDetailScreen.dart';
-import 'package:svf/Utilities/AppBar.dart';
-import 'package:svf/Utilities/EmptyDetailsCard.dart';
-import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
+import 'package:DigiVasool/PartyDetailScreen.dart';
+import 'package:DigiVasool/Utilities/AppBar.dart';
+import 'package:DigiVasool/Utilities/EmptyDetailsCard.dart';
+import 'package:DigiVasool/Utilities/FloatingActionButtonWithText.dart';
 
-import 'package:svf/Utilities/PartyScreen.dart';
-import 'package:svf/Utilities/drawer.dart';
+import 'package:DigiVasool/Utilities/PartyScreen.dart';
+import 'package:DigiVasool/Utilities/drawer.dart';
 import 'finance_provider.dart';
 
 class LineDetailScreen extends ConsumerStatefulWidget {
