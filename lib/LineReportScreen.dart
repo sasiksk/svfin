@@ -9,7 +9,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'dart:io';
 import 'package:open_file/open_file.dart';
-import 'package:svf/Utilities/pdf_generator.dart';
+import 'package:svf/Utilities/Reports/CusFullTrans/pdf_generator.dart';
 import 'package:svf/finance_provider.dart';
 
 class Linereportscreen extends ConsumerStatefulWidget {

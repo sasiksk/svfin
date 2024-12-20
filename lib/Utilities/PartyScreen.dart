@@ -132,7 +132,7 @@ class _PartyScreenState extends ConsumerState<PartyScreen> {
         _resetForm();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LineDetailScreen()),
+          MaterialPageRoute(builder: (context) => const LineDetailScreen()),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

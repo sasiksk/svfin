@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'dart:io';
-import 'package:open_file/open_file.dart';
-import 'package:svf/Utilities/pdf_generator.dart';
+import 'package:svf/Utilities/Reports/CusFullTrans/pdf_generator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/finance_provider.dart';
 
@@ -38,7 +33,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
       double totalYouGave = 0.0;
       double totalYouGot = 0.0;
 
-      List<PdfEntry> pdfEntries = []; // Create a list of PdfEntry
+      Map<String, List<PdfEntry>> groupedEntries = {}; // Group entries by date
 
       for (var entry in entries) {
         if (entry['CrAmt'] != null) {
@@ -53,14 +48,25 @@ class _ReportScreen2State extends State<ReportScreen2> {
             await DatabaseHelper.getPartyNameByLenId(entry['LenId']) ??
                 'Unknown';
 
-        // Add to pdfEntries
-        pdfEntries.add(PdfEntry(
+        // Create PdfEntry
+        PdfEntry pdfEntry = PdfEntry(
           partyName: partyName,
           date: entry['Date'],
           drAmt: entry['DrAmt'] ?? 0.0,
           crAmt: entry['CrAmt'] ?? 0.0,
-        ));
+        );
+
+        // Group by date
+        if (groupedEntries.containsKey(entry['Date'])) {
+          groupedEntries[entry['Date']]!.add(pdfEntry);
+        } else {
+          groupedEntries[entry['Date']] = [pdfEntry];
+        }
       }
+
+      // Flatten grouped entries into a single list
+      List<PdfEntry> pdfEntries =
+          groupedEntries.entries.expand((entry) => entry.value).toList();
 
       setState(() {
         _entries = pdfEntries;
@@ -74,9 +80,9 @@ class _ReportScreen2State extends State<ReportScreen2> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('View Report'),
+        title: const Text('View Report'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -97,7 +103,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                     lastDate: DateTime.now(),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: CustomDatePicker(
                     controller: _endDateController,
@@ -109,21 +115,21 @@ class _ReportScreen2State extends State<ReportScreen2> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _fetchEntries,
-              child: Text('Fetch Entries'),
+              child: const Text('Fetch Entries'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Net Balance Section
-            Text(
+            const Text(
               'Net Balance',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Container(
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.green.shade900,
                 borderRadius: BorderRadius.circular(8),
@@ -134,33 +140,36 @@ class _ReportScreen2State extends State<ReportScreen2> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total', style: TextStyle(color: Colors.white)),
+                      const Text('Total',
+                          style: TextStyle(color: Colors.white)),
                       Text('${_entries.length} Entries',
-                          style: TextStyle(color: Colors.white)),
+                          style: const TextStyle(color: Colors.white)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text('You Gave', style: TextStyle(color: Colors.yellow)),
-                      Text('₹ $_totalYouGave',
+                      const Text('You Gave',
                           style: TextStyle(color: Colors.yellow)),
+                      Text('₹ $_totalYouGave',
+                          style: const TextStyle(color: Colors.yellow)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text('You Got', style: TextStyle(color: Colors.white)),
-                      Text('₹ $_totalYouGot',
+                      const Text('You Got',
                           style: TextStyle(color: Colors.white)),
+                      Text('₹ $_totalYouGot',
+                          style: const TextStyle(color: Colors.white)),
                     ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
 
             // Entries List
             Expanded(
-              child: ListView.builder(
+              child: ListView.separated(
                 itemCount: _entries.length,
                 itemBuilder: (context, index) {
                   var entry = _entries[index];
@@ -183,10 +192,10 @@ class _ReportScreen2State extends State<ReportScreen2> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 16, horizontal: 16),
                             decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 219, 247, 169),
+                              color: const Color.fromARGB(255, 219, 247, 169),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -194,25 +203,25 @@ class _ReportScreen2State extends State<ReportScreen2> {
                               children: [
                                 Text(
                                   '${DateFormat('dd-MM').format(DateFormat('dd-MM-yyyy').parse(entry.date))}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                   ),
                                 ),
                                 Text(
                                   '₹${totalCrAmt != 0.0 ? totalCrAmt : 0.0}',
-                                  style: TextStyle(color: Colors.red),
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                                 Text(
                                   '₹${totalDrAmt != 0.0 ? totalDrAmt : 0.0}',
-                                  style: TextStyle(color: Colors.green),
+                                  style: const TextStyle(color: Colors.green),
                                 ),
                               ],
                             ),
                           ),
                         ),
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 16),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
@@ -227,7 +236,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                                   entry.partyName.length >= 4
                                       ? entry.partyName.substring(0, 4)
                                       : entry.partyName,
-                                  style: TextStyle(color: Colors.grey),
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -235,7 +244,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                               children: [
                                 Text(
                                   entry.crAmt != 0.0 ? '₹${entry.crAmt}' : '',
-                                  style: TextStyle(color: Colors.red),
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ],
                             ),
@@ -243,7 +252,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                               children: [
                                 Text(
                                   entry.drAmt != 0.0 ? '₹${entry.drAmt}' : '',
-                                  style: TextStyle(color: Colors.green),
+                                  style: const TextStyle(color: Colors.green),
                                 ),
                               ],
                             ),
@@ -253,6 +262,7 @@ class _ReportScreen2State extends State<ReportScreen2> {
                     ],
                   );
                 },
+                separatorBuilder: (context, index) => const Divider(),
               ),
             ),
 
@@ -273,8 +283,8 @@ class _ReportScreen2State extends State<ReportScreen2> {
                       finnaame,
                       // Pass the ref to generatePdf
                     ),
-                    icon: Icon(Icons.picture_as_pdf),
-                    label: Text('DOWNLOAD'),
+                    icon: const Icon(Icons.picture_as_pdf),
+                    label: const Text('DOWNLOAD'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: Colors.blue,

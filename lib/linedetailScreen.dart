@@ -13,6 +13,8 @@ import 'package:svf/Utilities/drawer.dart';
 import 'finance_provider.dart';
 
 class LineDetailScreen extends ConsumerStatefulWidget {
+  const LineDetailScreen({super.key});
+
   @override
   _LineDetailScreenState createState() => _LineDetailScreenState();
 }
@@ -153,7 +155,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
+            child: SizedBox(
               height: 50,
               child: TextField(
                 style: TextStyle(
@@ -212,7 +214,7 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
             child: ValueListenableBuilder<List<String>>(
               valueListenable: filteredPartyNamesNotifier,
               builder: (context, filteredPartyNames, _) {
-                return ListView.builder(
+                return ListView.separated(
                   itemCount: filteredPartyNames.length,
                   itemBuilder: (context, index) {
                     final partyName = filteredPartyNames[index];
@@ -280,19 +282,19 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: Text('Confirm Deletion'),
-                                      content: Text(
+                                      title: const Text('Confirm Deletion'),
+                                      content: const Text(
                                           'Are you sure you want to delete this party and related collections?'),
                                       actions: <Widget>[
                                         TextButton(
-                                          child: Text('Cancel'),
+                                          child: const Text('Cancel'),
                                           onPressed: () {
                                             Navigator.of(context)
                                                 .pop(); // Dismiss the dialog
                                           },
                                         ),
                                         TextButton(
-                                          child: Text('OK'),
+                                          child: const Text('OK'),
                                           onPressed: () async {
                                             Navigator.of(context)
                                                 .pop(); // Dismiss the dialog
@@ -334,13 +336,14 @@ class _LineDetailScreenState extends ConsumerState<LineDetailScreen> {
                       ),
                     );
                   },
+                  separatorBuilder: (context, index) => const Divider(),
                 );
               },
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButtonWithText(
+      floatingActionButton: const FloatingActionButtonWithText(
         label: 'Add Party',
         navigateTo: PartyScreen(),
         icon: Icons.add,

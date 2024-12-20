@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/CollectionScreen.dart';
@@ -10,20 +8,25 @@ import 'package:svf/Utilities/AppBar.dart';
 
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
+import 'package:svf/Utilities/Reports/CustomerReportScreen.dart';
 
 import 'package:svf/Utilities/TransactionCard.dart';
+
 import 'package:svf/lendingScreen2.dart';
+import 'package:svf/linedetailScreen.dart';
 
 import 'finance_provider.dart';
 import 'package:intl/intl.dart';
 
 class PartyDetailScreen extends ConsumerWidget {
+  const PartyDetailScreen({super.key});
+
   static Future<void> deleteEntry(BuildContext context, int cid,
       String linename, double drAmt, int lenId, String partyName) async {
     await CollectionDB.deleteEntry(cid);
     final lendingData = await dbLending.fetchLendingData(lenId);
-    final amtRecieved_Line = await dbline.fetchAmtRecieved(linename);
-    final newamtrecived = amtRecieved_Line + -drAmt;
+    final amtrecievedLine = await dbline.fetchAmtRecieved(linename);
+    final newamtrecived = amtrecievedLine + -drAmt;
     await dbline.updateLine(
       lineName: linename,
       updatedValues: {'Amtrecieved': newamtrecived},
@@ -31,7 +34,7 @@ class PartyDetailScreen extends ConsumerWidget {
 
     final double currentAmtCollected = lendingData['amtcollected'];
     final double newAmtCollected = currentAmtCollected - drAmt;
-    final String status = 'active';
+    const String status = 'active';
 
     final updatedValues = {'amtcollected': newAmtCollected, 'status': status};
     await dbLending.updateAmtCollectedAndGiven(
@@ -41,13 +44,13 @@ class PartyDetailScreen extends ConsumerWidget {
       updatedValues: updatedValues,
     );
 
-    //Navigator.of(context).pop(); // Close the confirmation dialog
+    // Navigator.of(context).pop(); // Close the confirmation dialog
     // Close the options dialog
-    Navigator.of(context).pushReplacement(
+    /*Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => PartyDetailScreen(),
+        builder: (context) => const PartyDetailScreen(),
       ),
-    );
+    );*/
   }
 
   @override
@@ -62,6 +65,18 @@ class PartyDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: partyName ?? 'Party Details',
+        lending: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const LineDetailScreen(), // Replace with your LineDetailScreen
+              ),
+            );
+          },
+        ),
         actions: [
           //refresh
           IconButton(
@@ -101,7 +116,7 @@ class PartyDetailScreen extends ConsumerWidget {
                         final daysrem =
                             data['duedays'] != null && daysover != null
                                 ? data['duedays'] - daysover
-                                : null;
+                                : 0.0;
 
                         final duedate = data['lentdate'] != null &&
                                 data['lentdate'].isNotEmpty
@@ -118,7 +133,6 @@ class PartyDetailScreen extends ConsumerWidget {
                             ? (data['totalAmtGiven'] + data['totalProfit']) /
                                 data['duedays']
                             : 0.0;
-                        print('perday$perrday');
 
                         final totalAmtCollected =
                             data['totalAmtCollected'] ?? 0.0;
@@ -131,7 +145,6 @@ class PartyDetailScreen extends ConsumerWidget {
                           pendays =
                               ((data['duedays'] ?? 0) - givendays).toDouble();
                         }
-                        print(pendays);
 
                         return Column(
                           children: [
@@ -155,7 +168,7 @@ class PartyDetailScreen extends ConsumerWidget {
                             ),
                             const Divider(
                               thickness: 2,
-                              color: const Color.fromARGB(255, 245, 244, 244),
+                              color: Color.fromARGB(255, 245, 244, 244),
                             ),
                             Row(
                               children: [
@@ -176,7 +189,7 @@ class PartyDetailScreen extends ConsumerWidget {
                             ),
                             const Divider(
                               thickness: 2,
-                              color: const Color.fromARGB(255, 247, 244, 244),
+                              color: Color.fromARGB(255, 247, 244, 244),
                             ),
                             Row(
                               children: [
@@ -215,20 +228,20 @@ class PartyDetailScreen extends ConsumerWidget {
                             ),
                             const Divider(
                               thickness: 2,
-                              color: const Color.fromARGB(255, 247, 244, 244),
+                              color: Color.fromARGB(255, 247, 244, 244),
                             ),
                             const SizedBox(height: 5),
                             Row(
                               children: [
-                                Text(
+                                const Text(
                                   'Days',
-                                  style: const TextStyle(fontSize: 14),
+                                  style: TextStyle(fontSize: 14),
                                 ),
                                 Text(
                                   'Paid: ${givendays.toStringAsFixed(2)}',
                                   style: const TextStyle(fontSize: 14),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   width: 10,
                                 ),
                                 Text(
@@ -238,7 +251,8 @@ class PartyDetailScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: pendays < 0
-                                        ? Color.fromARGB(255, 245, 244, 247)
+                                        ? const Color.fromARGB(
+                                            255, 245, 244, 247)
                                         : Colors.white,
                                   ),
                                 ),
@@ -272,7 +286,11 @@ class PartyDetailScreen extends ConsumerWidget {
                           icon: const Icon(Icons.picture_as_pdf,
                               color: Colors.blue),
                           onPressed: () {
-                            // Add your logic here
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ViewReportsPage(),
+                              ),
+                            );
                           },
                         ),
                         const Text('Report', style: TextStyle(fontSize: 12)),
@@ -285,6 +303,11 @@ class PartyDetailScreen extends ConsumerWidget {
                           icon: const Icon(Icons.sms, color: Colors.blue),
                           onPressed: () {
                             // Add your logic here
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Coming Soon...'),
+                              ),
+                            );
                           },
                         ),
                         const Text('SMS', style: TextStyle(fontSize: 12)),
@@ -296,7 +319,11 @@ class PartyDetailScreen extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.telegram, color: Colors.blue),
                           onPressed: () {
-                            // Add your logic here
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Coming Soon...'),
+                              ),
+                            );
                           },
                         ),
                         const Text('WhatsApp', style: TextStyle(fontSize: 12)),
@@ -349,7 +376,7 @@ class PartyDetailScreen extends ConsumerWidget {
                   final entries = snapshot.data!;
 
                   // Assuming you start with a 0 balance
-                  return ListView.builder(
+                  return ListView.separated(
                     itemCount: entries.length,
                     itemBuilder: (context, index) {
                       final entry = entries[index];
@@ -407,6 +434,7 @@ class PartyDetailScreen extends ConsumerWidget {
                         ),
                       );
                     },
+                    separatorBuilder: (context, index) => const Divider(),
                   );
                 }
               },
@@ -415,7 +443,7 @@ class PartyDetailScreen extends ConsumerWidget {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
+        shape: const CircularNotchedRectangle(),
         notchMargin: 6.0,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),

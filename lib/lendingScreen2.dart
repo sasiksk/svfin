@@ -1,9 +1,7 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/PartyDetailScreen.dart';
+
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
@@ -73,7 +71,7 @@ class LendingCombinedDetailsScreen2 extends ConsumerWidget {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lending details updated successfully')),
+          const SnackBar(content: Text('Lending details updated successfully')),
         );
 
         /*Navigator.pushReplacement(
@@ -186,33 +184,41 @@ class LendingCombinedDetailsScreen2 extends ConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 10),
-                CustomDatePicker(
-                  controller: _lentDateController,
-                  labelText: "Lent Date",
-                  hintText: "Pick a lent date",
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime.now(),
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: _dueDaysController,
-                  decoration: const InputDecoration(
-                    labelText: "Due Days",
-                    hintText: "Enter the due days",
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the due days';
-                    }
-                    return null;
-                  },
-                  onTap: () {
-                    _dueDaysController.clear();
-                  },
-                  onChanged: (value) => _calculateDueDate(),
-                  onFieldSubmitted: (value) => _calculateDueDate(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomDatePicker(
+                        controller: _lentDateController,
+                        labelText: "Lent Date",
+                        hintText: "Pick a lent date",
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _dueDaysController,
+                        decoration: const InputDecoration(
+                          labelText: "Due Days",
+                          hintText: "Enter the due days",
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the due days';
+                          }
+                          return null;
+                        },
+                        onTap: () {
+                          _dueDaysController.clear();
+                        },
+                        onChanged: (value) => _calculateDueDate(),
+                        onFieldSubmitted: (value) => _calculateDueDate(),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 CustomTextField(
@@ -224,39 +230,58 @@ class LendingCombinedDetailsScreen2 extends ConsumerWidget {
                 const SizedBox(height: 20),
 
                 // Submit Button
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() == true) {
-                        DatabaseHelper.getLenId(lineName!, partyName!)
-                            .then((lenid) async {
-                          if (lenid != null) {
-                            final lenStatus =
-                                await dbLending.getStatusByLenId(lenid);
-                            if (lenStatus == 'passive') {
-                              _updateLending(
-                                  context, lineName, partyName, lenid);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Form Submitted')),
-                              );
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() == true) {
+                          DatabaseHelper.getLenId(lineName!, partyName!)
+                              .then((lenid) async {
+                            if (lenid != null) {
+                              final lenStatus =
+                                  await dbLending.getStatusByLenId(lenid);
+                              if (lenStatus == 'passive') {
+                                _updateLending(
+                                    context, lineName, partyName, lenid);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Form Submitted')),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Error: Cannot lend amount to active state party')),
+                                );
+                              }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text(
-                                        'Error: Cannot lend amount to active state party')),
+                                    content: Text('Error: LenId is null')),
                               );
                             }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Error: LenId is null')),
-                            );
-                          }
-                        });
-                      }
-                    },
-                    child: const Text("Submit"),
-                  ),
+                          });
+                        }
+                      },
+                      child: const Text("Submit"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState?.reset();
+                        _lentDateController.clear();
+                        _dueDaysController.clear();
+                        // Clear other controllers if needed
+                      },
+                      child: const Text("Reset"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                  ],
                 ),
               ],
             ),

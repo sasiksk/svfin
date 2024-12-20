@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/Utilities/pdf_generator2.dart';
+import 'package:svf/Utilities/Reports/Custrans/pdf_generator2.dart';
+import 'package:svf/finance_provider.dart';
 
-class ReportScreen1 extends StatelessWidget {
+class ReportScreen1 extends ConsumerWidget {
   const ReportScreen1({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final financeName = ref.watch(financeProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Generate PDF'),
+        title: Text('Customer Wise Report'),
       ),
       body: Center(
         child: ElevatedButton(
@@ -24,7 +28,7 @@ class ReportScreen1 extends StatelessWidget {
             double totalExpense = await fetchTotalExpense();
 
             await generateNewPdf(entries, totalAmtGiven, totalProfit,
-                totalAmtReceived, totalExpense, 'sk');
+                totalAmtReceived, totalExpense, financeName);
           },
           child: Text('Generate PDF'),
         ),
@@ -35,6 +39,6 @@ class ReportScreen1 extends StatelessWidget {
   Future<double> fetchTotalExpense() async {
     // Implement your logic to fetch total expense from the database
     // Example:
-    return 100.0;
+    return 0.0;
   }
 }

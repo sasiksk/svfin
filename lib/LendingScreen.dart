@@ -1,9 +1,7 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:svf/Data/Databasehelper.dart';
-import 'package:svf/PartyDetailScreen.dart';
+
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/CustomDatePicker.dart';
 import 'package:svf/Utilities/CustomTextField.dart';
@@ -18,6 +16,7 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
   final int cid;
 
   LendingCombinedDetailsScreen({
+    super.key,
     this.preloadedamtgiven = 0,
     this.preladedprofit = 0,
     this.preladedlendate = '',
@@ -55,7 +54,6 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
             'status': 'active',
           };
 
-          print(total.toString());
           await CollectionDB.updateCollection(
             cid: cid,
             lenId: lentid,
@@ -83,14 +81,10 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
             final double existingAmtGiven = existingEntry['Amtgiven'];
             final double existingProfit = existingEntry['Profit'];
 
-            print('existingAmtGiven: $existingAmtGiven');
-            print('preloadedamtgiven: $preloadedamtgiven');
-            print('amtGiven: $amtGiven');
             final double newAmtGiven =
                 existingAmtGiven - preloadedamtgiven + amtGiven;
-            print('newAmtGiven: $newAmtGiven');
+
             final double newProfit = existingProfit - preladedprofit + profit;
-            print('newProfit: $newProfit');
 
             // Update the Line table with new values
             await dbline.updateLineAmounts(
@@ -101,7 +95,8 @@ class LendingCombinedDetailsScreen extends ConsumerWidget {
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lending details updated successfully')),
+            const SnackBar(
+                content: Text('Lending details updated successfully')),
           );
 
           /*Navigator.pushReplacement(

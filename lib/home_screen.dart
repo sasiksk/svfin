@@ -4,15 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:svf/Data/Databasehelper.dart';
 import 'package:svf/LineScreen.dart';
-import 'package:svf/ReportScreen2.dart';
+import 'package:svf/Utilities/Reports/CusFullTrans/ReportScreen2.dart';
 import 'package:svf/Utilities/AppBar.dart';
 import 'package:svf/Utilities/EmptyDetailsCard.dart';
 import 'package:svf/Utilities/LineCard.dart';
+import 'package:svf/Utilities/Reports/CustomerReportScreen.dart';
 import 'package:svf/Utilities/drawer.dart';
 import 'package:svf/Utilities/FloatingActionButtonWithText.dart';
 import 'package:svf/linedetailScreen.dart';
 import 'finance_provider.dart';
-import 'package:svf/Utilities/GoogleFileUpload.dart';
+
 import 'dart:io';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -141,7 +142,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () async {
               final dbFilePath = await DatabaseHelper.getDatabasePath();
               File dbFile = File(dbFilePath);
-              print(dbFile.path);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Coming soon...'),
+                ),
+              );
               //  await uploader.uploadFileToFirebase(dbFile);
             },
           ),
@@ -284,7 +289,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ReportScreen2()),
+                            builder: (context) => ViewReportsPage()),
                       );
                     },
                   ),
@@ -340,7 +345,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
 
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: lineNames.length,
               itemBuilder: (context, index) {
                 final lineName = lineNames[index];
@@ -381,8 +386,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       onTap: () => handleLineSelected(lineName),
                       trailing: SizedBox(
-                        width: MediaQuery.of(context).size.width *
-                            0.4, // Adjust the width as needed
+                        width: MediaQuery.of(context).size.width * 0.4,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -419,15 +423,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           TextButton(
                                             child: const Text('Cancel'),
                                             onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Dismiss the dialog
+                                              Navigator.of(context).pop();
                                             },
                                           ),
                                           TextButton(
                                             child: const Text('OK'),
                                             onPressed: () async {
-                                              Navigator.of(context)
-                                                  .pop(); // Dismiss the dialog
+                                              Navigator.of(context).pop();
                                               final lenIds = await dbLending
                                                   .getLenIdsByLineName(
                                                       lineName);
@@ -467,6 +469,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 );
               },
+              separatorBuilder: (context, index) => const Divider(),
             ),
           ),
         ],

@@ -41,8 +41,7 @@ class CollectionScreen extends ConsumerWidget {
       'status':
           (amtgiven - collectedAmt - amtCollected) == 0 ? 'passive' : 'active',
     };
-    print(amtgiven);
-    print(updatedValues.toString());
+
     await dbLending.updateDueAmt(
       lenId: lenId,
       updatedValues: updatedValues,
@@ -173,7 +172,6 @@ class CollectionScreen extends ConsumerWidget {
                                   drAmt: collectedAmt,
                                 );
                               } else {
-                                print('error');
                                 // filepath: /path/to/CollectionScreen.dart
                                 Future.delayed(Duration.zero, () {
                                   showDialog(
@@ -190,7 +188,7 @@ class CollectionScreen extends ConsumerWidget {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      PartyDetailScreen(),
+                                                      const PartyDetailScreen(),
                                                 ),
                                               );
                                             },
@@ -237,7 +235,6 @@ class CollectionScreen extends ConsumerWidget {
                                     lineName, collectedAmt);
 
                                 if (sms == 1) {
-                                  print('sms');
                                   //await _sendSms(pno, 'Your message here');
                                 }
                               } else {
@@ -256,7 +253,7 @@ class CollectionScreen extends ConsumerWidget {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      PartyDetailScreen(),
+                                                      const PartyDetailScreen(),
                                                 ),
                                               );
                                             },
@@ -276,7 +273,7 @@ class CollectionScreen extends ConsumerWidget {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PartyDetailScreen(),
+                                builder: (context) => const PartyDetailScreen(),
                               ),
                             );
                           } else {
@@ -336,7 +333,7 @@ class CollectionScreen extends ConsumerWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PartyDetailScreen(),
+                            builder: (context) => const PartyDetailScreen(),
                           ),
                         );
                       }

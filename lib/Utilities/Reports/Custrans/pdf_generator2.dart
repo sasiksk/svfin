@@ -59,7 +59,8 @@ Future<void> generateNewPdf(
           children: [
             pw.Container(
               color: PdfColors.blue,
-              padding: pw.EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              padding:
+                  const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: pw.Center(
                 child: pw.Column(
                   children: [
@@ -89,7 +90,7 @@ Future<void> generateNewPdf(
 
             // Summary Card
             pw.Container(
-              padding: pw.EdgeInsets.all(16),
+              padding: const pw.EdgeInsets.all(16),
               decoration: pw.BoxDecoration(
                 color: PdfColors.grey300,
                 borderRadius: pw.BorderRadius.circular(8),
@@ -169,18 +170,18 @@ Future<void> generateNewPdf(
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey, width: 1),
               columnWidths: {
-                0: pw.FlexColumnWidth(2),
-                1: pw.FlexColumnWidth(3),
-                2: pw.FlexColumnWidth(2),
-                3: pw.FlexColumnWidth(2),
-                4: pw.FlexColumnWidth(2),
+                0: const pw.FlexColumnWidth(2),
+                1: const pw.FlexColumnWidth(3),
+                2: const pw.FlexColumnWidth(2),
+                3: const pw.FlexColumnWidth(2),
+                4: const pw.FlexColumnWidth(2),
               },
               children: [
                 pw.TableRow(
-                  decoration: pw.BoxDecoration(color: PdfColors.grey300),
+                  decoration: const pw.BoxDecoration(color: PdfColors.grey300),
                   children: [
                     pw.Padding(
-                      padding: pw.EdgeInsets.all(8),
+                      padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
                         'Line Name',
                         style: pw.TextStyle(
@@ -191,7 +192,7 @@ Future<void> generateNewPdf(
                       ),
                     ),
                     pw.Padding(
-                      padding: pw.EdgeInsets.all(8),
+                      padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
                         'Party Name',
                         style: pw.TextStyle(
@@ -202,7 +203,7 @@ Future<void> generateNewPdf(
                       ),
                     ),
                     pw.Padding(
-                      padding: pw.EdgeInsets.all(8),
+                      padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
                         'Amt Given + Profit',
                         style: pw.TextStyle(
@@ -213,7 +214,7 @@ Future<void> generateNewPdf(
                       ),
                     ),
                     pw.Padding(
-                      padding: pw.EdgeInsets.all(8),
+                      padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
                         'Amt Collected',
                         style: pw.TextStyle(
@@ -224,7 +225,7 @@ Future<void> generateNewPdf(
                       ),
                     ),
                     pw.Padding(
-                      padding: pw.EdgeInsets.all(8),
+                      padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
                         'Balance Amt',
                         style: pw.TextStyle(
@@ -241,7 +242,7 @@ Future<void> generateNewPdf(
                     pw.TableRow(
                       children: [
                         pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
+                          padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(
                             entry.key,
                             style: pw.TextStyle(
@@ -252,19 +253,19 @@ Future<void> generateNewPdf(
                           ),
                         ),
                         pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
+                          padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(''),
                         ),
                         pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
+                          padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(''),
                         ),
                         pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
+                          padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(''),
                         ),
                         pw.Padding(
-                          padding: pw.EdgeInsets.all(8),
+                          padding: const pw.EdgeInsets.all(8),
                           child: pw.Text(''),
                         ),
                       ],
@@ -273,11 +274,11 @@ Future<void> generateNewPdf(
                       return pw.TableRow(
                         children: [
                           pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
+                            padding: const pw.EdgeInsets.all(8),
                             child: pw.Text(''),
                           ),
                           pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
+                            padding: const pw.EdgeInsets.all(8),
                             child: pw.Text(
                               pdfEntry.partyName,
                               style: pw.TextStyle(
@@ -287,7 +288,7 @@ Future<void> generateNewPdf(
                             ),
                           ),
                           pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
+                            padding: const pw.EdgeInsets.all(8),
                             child: pw.Text(
                               '\u20B9${pdfEntry.amtGiven + pdfEntry.profit}',
                               style: pw.TextStyle(
@@ -297,7 +298,7 @@ Future<void> generateNewPdf(
                             ),
                           ),
                           pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
+                            padding: const pw.EdgeInsets.all(8),
                             child: pw.Text(
                               '\u20B9${pdfEntry.amtCollected}',
                               style: pw.TextStyle(
@@ -307,7 +308,7 @@ Future<void> generateNewPdf(
                             ),
                           ),
                           pw.Padding(
-                            padding: pw.EdgeInsets.all(8),
+                            padding: const pw.EdgeInsets.all(8),
                             child: pw.Text(
                               '\u20B9${pdfEntry.balanceAmt}',
                               style: pw.TextStyle(

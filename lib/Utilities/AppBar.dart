@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
-  final Widget? drawer; // Add a drawer property
+  final Widget? drawer;
+  final IconButton? lending; // Add a drawer property
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.actions,
-    this.drawer, // Initialize the drawer property
+    this.drawer,
+    this.lending,
   });
 
   @override

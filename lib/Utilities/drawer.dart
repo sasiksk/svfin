@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:svf/CollectionScreen.dart';
+import 'package:flutter/services.dart';
 import 'package:svf/Data/Databasehelper.dart';
+import 'package:svf/Utilities/Reports/CustomerReportScreen.dart';
+import 'package:svf/home_screen.dart';
+/*import 'package:svf/CollectionScreen.dart';
+
 import 'package:svf/LendingScreen.dart';
 import 'package:svf/LineScreen.dart';
 import 'package:svf/ReportScreen.dart';
-import 'package:svf/Utilities/PartyScreen.dart';
-import 'package:svf/Utilities/ReportScreen1.dart';
 
-import 'package:svf/home_screen.dart';
-import 'package:svf/linedetailScreen.dart';
+import 'package:svf/Utilities/PartyScreen.dart';
+import 'package:svf/Utilities/Reports/Custrans/ReportScreen1.dart';
+
+
+import 'package:svf/linedetailScreen.dart';*/
 
 Widget buildDrawer(BuildContext context) {
   return Drawer(
@@ -38,7 +43,75 @@ Widget buildDrawer(BuildContext context) {
             );
           },
         ),
+
         ListTile(
+          leading: const Icon(Icons.picture_as_pdf),
+          title: const Text(' View Reports'),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ViewReportsPage()),
+            );
+          },
+        ),
+
+        ListTile(
+          leading: const Icon(Icons.restore_outlined),
+          title: const Text('Reset All '),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Confirm'),
+                  content:
+                      const Text('Are you sure you want to reset all data?'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        DatabaseHelper.dropDatabase();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Success'),
+                              content: const Text(
+                                  'All data has been reset successfully.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.exit_to_app_rounded),
+          title: const Text(' Exit'),
+          onTap: () {
+            SystemNavigator.pop();
+          },
+        ),
+        /* ListTile(
           leading: const Icon(Icons.report),
           title: const Text('Reports'),
           onTap: () {
@@ -49,13 +122,7 @@ Widget buildDrawer(BuildContext context) {
             );
           },
         ),
-        ListTile(
-          leading: const Icon(Icons.report),
-          title: const Text('Drop Database'),
-          onTap: () {
-            DatabaseHelper.dropDatabase();
-          },
-        ),
+        
         ListTile(
           leading: const Icon(Icons.report),
           title: const Text('Create db'),
@@ -123,7 +190,7 @@ Widget buildDrawer(BuildContext context) {
               MaterialPageRoute(builder: (context) => ReportScreen1()),
             );
           },
-        ),
+        ),*/
 
         // Add more items here as needed
       ],

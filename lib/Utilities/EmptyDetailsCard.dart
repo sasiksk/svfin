@@ -32,8 +32,7 @@ class EmptyCard extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 Colors.blueAccent,
-                Colors.blue,
-                Colors.lightBlueAccent
+                Colors.blueGrey[800] ?? Colors.blueGrey.shade400
               ], // Gradient background
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
